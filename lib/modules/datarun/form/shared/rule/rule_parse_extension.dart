@@ -4,6 +4,9 @@ import 'package:d2_remote/modules/datarun/form/shared/rule/action.dart';
 import 'package:d2_remote/modules/datarun/form/shared/template_extensions/form_traverse_extension.dart';
 
 extension FieldTemplateDependencies on Template {
+  List<String> get allDependencies =>
+      {...dependencies, ...filterDependencies}.toSet().toList();
+
   List<String> get dependencies {
     List<String> dependencySet = [];
     for (final rule in rules?.unlockView ?? []) {

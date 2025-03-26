@@ -89,7 +89,7 @@ class Assignment extends IdentifiableEntity {
 
     return Assignment(
         id: json['uid'] ?? json['id'].toString(),
-        // uid: json['uid'],
+        // id: json['id'],
         name: json['name'] ?? json['orgUnit']?['name'],
         allocatedResources: json['allocatedResources'] != null
             ? Map<String, Object?>.from(json['allocatedResources'] is String
@@ -146,7 +146,7 @@ class Assignment extends IdentifiableEntity {
     //     : <String>[];
 
     return Assignment(
-        id: json['uid'],
+        id: json['uid'] ?? json['id'].toString(),
         // uid: json['uid'],
         name: json['name'] ?? json['orgUnit']?['name'],
         allocatedResources: json['allocatedResources'] != null

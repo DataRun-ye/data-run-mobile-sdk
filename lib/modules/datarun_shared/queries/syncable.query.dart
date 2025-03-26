@@ -22,12 +22,6 @@ abstract class SyncableQuery<T extends SyncableEntity> extends BaseQuery<T> {
   String? form;
   int? version;
 
-  // T fromJsonInstance(Map<String, dynamic> entityMap) {
-  //   ClassMirror classMirror =
-  //       AnnotationReflectable.reflectType(T) as ClassMirror;
-  //   return classMirror.newInstance('fromJson', [entityMap]) as T;
-  // }
-
   SyncableQuery<T> byFormTemplate(String form) {
     this.form = form;
     this.version = version;
@@ -73,15 +67,7 @@ abstract class SyncableQuery<T extends SyncableEntity> extends BaseQuery<T> {
       return false;
     }
 
-    // final authorities = user.authorities;
-    // final haveChvSuperAuth =
-    //     authorities?.map((t) => t.authority).contains('ROLE_CHV_SUPERVISOR') ??
-    //         false;
-
     final entity = await getOne();
-    // final formVersion =
-    //     await FormVersionQuery().byId(entity?.formVersion).getOne();
-
     return entity?.synced == false ||
         entity?.createdBy != null /*|| haveChvSuperAuth*/;
   }
@@ -182,12 +168,6 @@ abstract class SyncableQuery<T extends SyncableEntity> extends BaseQuery<T> {
       ClassMirror classMirror =
           AnnotationReflectable.reflectType(T) as ClassMirror;
       if (syncCreated || syncUpdated) {
-        // syncableEntity.synced = true;
-        // syncableEntity.dirty = false;
-        // syncableEntity.syncFailed = false;
-        // syncableEntity.lastSyncDate = DateHelper.nowUtc();
-        // syncableEntity.lastSyncMessage = null;
-
         newEntity = classMirror.newInstance('fromJson', [
           {
             ...newEntity.toJson(),
@@ -201,11 +181,6 @@ abstract class SyncableQuery<T extends SyncableEntity> extends BaseQuery<T> {
         ]) as T;
         availableItemCount++;
       } else if (syncFailed) {
-        // syncableEntity.synced = false;
-        // syncableEntity.dirty = true;
-        // syncableEntity.syncFailed = true;
-        // syncableEntity.lastSyncDate = DateHelper.nowUtc();
-        // syncableEntity.lastSyncMessage = summary.failed[syncableEntity.id];
         newEntity = classMirror.newInstance('fromJson', [
           {
             ...newEntity.toJson(),

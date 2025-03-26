@@ -21,6 +21,8 @@ abstract class Template with EquatableMixin, TreeElement {
 
   bool get mainField => false;
 
+  bool get mandatory => false;
+
   IList<Rule>? get rules;
 
   // IList<Template> get fields => const IList.empty();

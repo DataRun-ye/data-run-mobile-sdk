@@ -149,7 +149,7 @@ class SyncableEntity extends BaseEntity {
     // }
 
     if (team != null && team.runtimeType != String) {
-      syncableToUpload['team'] = team['id'];
+      syncableToUpload['team'] = team['uid'] ?? team['id'];
     }
 
     if (form != null) {

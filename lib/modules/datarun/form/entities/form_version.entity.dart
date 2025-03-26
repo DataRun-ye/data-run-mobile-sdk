@@ -217,7 +217,7 @@ class FormVersion extends IdentifiableEntity
         : <DOptionSet>[];
 
     return FormVersion(
-      id: json['uid'],
+      id: json['uid'] ?? json['id'].toString(),
       // uid: json['uid'],
       code: json['code'],
       name: json['name'],
