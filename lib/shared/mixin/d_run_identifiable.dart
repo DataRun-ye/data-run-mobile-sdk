@@ -1,4 +1,6 @@
-abstract class IdentifiableModel {
+import 'package:d2_remote/shared/mixin/d_run_base.dart';
+
+abstract class DRunIdentifiableBase extends DRunBase {
   String? get id;
 
   String? get code;
@@ -10,7 +12,7 @@ abstract class IdentifiableModel {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is IdentifiableModel &&
+      (other is DRunIdentifiableBase &&
           runtimeType == other.runtimeType &&
           id == other.id &&
           code == other.code &&
@@ -19,10 +21,7 @@ abstract class IdentifiableModel {
 
   @override
   int get hashCode =>
-      id.hashCode ^
-      code.hashCode ^
-      name.hashCode ^
-      displayName.hashCode;
+      id.hashCode ^ code.hashCode ^ name.hashCode ^ displayName.hashCode;
 
   @override
   String toString() {

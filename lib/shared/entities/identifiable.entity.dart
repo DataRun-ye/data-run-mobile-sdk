@@ -1,10 +1,9 @@
 import 'package:d2_remote/core/annotations/index.dart' as legacy;
 import 'package:d2_remote/shared/entities/base.entity.dart';
-import 'package:d2_remote/shared/entities/d_run_identifiable.dart';
+import 'package:d2_remote/shared/mixin/d_run_identifiable.dart';
 
 @legacy.AnnotationReflectable
-class IdentifiableEntity
-    extends BaseEntity implements IdentifiableModel {
+class IdentifiableEntity extends BaseEntity implements DRunIdentifiableBase {
   @legacy.Column(nullable: true)
   final String? name;
 
@@ -19,7 +18,6 @@ class IdentifiableEntity
 
   IdentifiableEntity({
     String? id,
-    // String? uid,
     required bool dirty,
     this.name,
     String? displayName,
@@ -30,7 +28,6 @@ class IdentifiableEntity
   })  : this.displayName = displayName ?? name,
         super(
             id: id,
-            // uid: uid,
             dirty: dirty,
             createdDate: createdDate,
             lastModifiedDate: lastModifiedDate);
@@ -62,6 +59,6 @@ class IdentifiableEntity
         ' name: $name,' +
         ' dirty: $dirty,' +
         ' lastModifiedDate: $lastModifiedDate,'
-     '}';
+            '}';
   }
 }
