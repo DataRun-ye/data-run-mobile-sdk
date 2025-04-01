@@ -12,3 +12,9 @@ enum QueryCondition {
   GreaterThan,
   GreaterThanOrEqualTo
 }
+
+// NMC
+enum LogicalOperator {
+  AND,
+  OR,
+}

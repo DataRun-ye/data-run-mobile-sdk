@@ -8,6 +8,7 @@ class QueryFilter {
   String? filterCondition;
   String? key;
   String? keyValue;
+
   QueryFilter(
       {required this.attribute,
       required this.condition,
@@ -17,7 +18,8 @@ class QueryFilter {
       this.keyValue});
 
   static String? getWhereParameters(
-      List<Column> columns, List<QueryFilter>? filters) {
+      List<Column> columns, List<QueryFilter>? filters,
+      {LogicalOperator operator = LogicalOperator.AND}) {
     if (filters == null) {
       return null;
     }
@@ -66,7 +68,9 @@ class QueryFilter {
       }
     }).where((filter) => filter != null);
 
-    return whereParams.length > 0 ? whereParams.join(' AND ') : null;
+    return whereParams.length > 0
+        ? whereParams.join(' ${operator.name} ')
+        : null;
   }
 
   static String? getApiFilters(
