@@ -2,16 +2,21 @@ import 'package:d2_remote/core/annotations/index.dart';
 import 'package:d2_remote/modules/datarun_shared/utilities/active_status.dart';
 import 'package:d2_remote/modules/datarun_shared/utilities/entity_scope.dart';
 import 'package:d2_remote/modules/metadatarun/teams/entities/d_team.entity.dart';
+import 'package:d2_remote/modules/metadatarun/teams/repository/team_repository.dart';
 import 'package:d2_remote/shared/models/request_progress.model.dart';
 import 'package:d2_remote/shared/queries/base.query.dart';
 import 'package:d2_remote/shared/utilities/http_client.util.dart';
 import 'package:dio/dio.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:injectable/injectable.dart';
 
 @AnnotationReflectable
 @Query(type: QueryType.METADATA)
+@LazySingleton()
 class TeamQuery extends BaseQuery<Team> {
-  TeamQuery({Database? database}) : super(database: database);
+  final TeamRepository dataSource;
+
+  TeamQuery(this.dataSource) : super(dataSource);
+
   String? activity;
   ActiveStatus? activeStatus;
 
@@ -35,10 +40,6 @@ class TeamQuery extends BaseQuery<Team> {
     }
   }
 
-  Future<List<Team>>? getManagedTeams() async {
-    return this.where(attribute: 'scope', value: 'Managed');
-  }
-
   @override
   Future<List<Team>?> download(Function(RequestProgress, bool) callback,
       {Dio? dioTestClient}) async {
@@ -53,7 +54,7 @@ class TeamQuery extends BaseQuery<Team> {
     final dataRunUrl = await this.dataRunUrl();
 
     final response = await HttpClient.get(dataRunUrl,
-        database: this.database, dioTestClient: dioTestClient);
+        database: await this.dataSource.database, dioTestClient: dioTestClient);
 
     List data = response.body[this.apiResourceName]?.toList();
 
@@ -86,7 +87,7 @@ class TeamQuery extends BaseQuery<Team> {
     final String managedTeamsUrl = 'teams/managed?paged=false';
 
     final managedTeamsResponse = await HttpClient.get(managedTeamsUrl,
-        database: this.database, dioTestClient: dioTestClient);
+        database: await this.dataSource.database, dioTestClient: dioTestClient);
 
     List managedData =
         managedTeamsResponse.body[this.apiResourceName]?.toList() ?? [];
@@ -115,7 +116,7 @@ class TeamQuery extends BaseQuery<Team> {
             percentage: 90),
         false);
 
-    await TeamQuery().setData(managedTeams).save();
+    await this.setData(managedTeams).save();
 
     // await this.save();
 

@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'package:d2_remote/core/annotations/reflectable.annotation.dart';
 import 'package:d2_remote/core/datarun/logging/new_app_logging.dart';
 import 'package:d2_remote/core/datarun/utilities/date_helper.dart';
+import 'package:d2_remote/core/utilities/sqflite_data_store.dart';
 import 'package:d2_remote/d2_remote.dart';
+import 'package:d2_remote/modules/auth/user/queries/d_user.query.dart';
 import 'package:d2_remote/modules/datarun_shared/entities/syncable.entity.dart';
 import 'package:d2_remote/modules/datarun_shared/utilities/sync_summary.dart';
 import 'package:d2_remote/shared/queries/base.query.dart';
@@ -11,11 +13,10 @@ import 'package:d2_remote/shared/utilities/http_client.util.dart';
 import 'package:dio/dio.dart';
 import 'package:queue/queue.dart';
 import 'package:reflectable/mirrors.dart';
-import 'package:sqflite/sqflite.dart';
 
 @AnnotationReflectable
 abstract class SyncableQuery<T extends SyncableEntity> extends BaseQuery<T> {
-  SyncableQuery({Database? database}) : super(database: database);
+  SyncableQuery(DataStore<T> repository) : super(repository);
   String? assignment;
   String? team;
   String? orgUnit;
@@ -26,7 +27,7 @@ abstract class SyncableQuery<T extends SyncableEntity> extends BaseQuery<T> {
     this.form = form;
     this.version = version;
     final value = '${form}${version != null ? '_$version' : ''}%';
-    return this.like(attribute: 'formVersion', value: value);
+    return this.like(attribute: 'formVersion', value: value) as SyncableQuery<T>;
   }
 
   /// Not Synced to server at all, no available on server
@@ -62,7 +63,9 @@ abstract class SyncableQuery<T extends SyncableEntity> extends BaseQuery<T> {
   }
 
   Future<bool> canEdit() async {
-    final user = await D2Remote.userModule.user.withAuthorities().getOne();
+    final user = await (D2Remote.userModule.user as UserQuery)
+        .withAuthorities()
+        .getOne();
     if (user == null) {
       return false;
     }
@@ -152,7 +155,7 @@ abstract class SyncableQuery<T extends SyncableEntity> extends BaseQuery<T> {
 
     final response = await HttpClient.post(
         '${this.apiResourceName as String}/bulk', uploadPayload,
-        database: this.database, dioTestClient: dioTestClient);
+        database: await this.dataSource.database, dioTestClient: dioTestClient);
 
     SyncSummary summary = SyncSummary.fromJson(response.body);
     logDebug(jsonEncode(uploadPayload.first), data: {"data": uploadPayload});

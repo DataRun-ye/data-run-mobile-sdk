@@ -14,7 +14,7 @@
 // import 'package:sqflite/sqflite.dart';
 //
 // class FileResourceQuery extends BaseQuery<FileResource> {
-//   FileResourceQuery({Database? database}) : super(database: database);
+//   FileResourceQuery(this.repository) : super(repository);
 //
 //   Future<List<FileResource>?> upload(Function(RequestProgress, bool) callback,
 //       {Dio? dioTestClient}) async {

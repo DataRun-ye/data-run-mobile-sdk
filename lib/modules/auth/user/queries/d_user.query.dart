@@ -1,18 +1,23 @@
 import 'package:d2_remote/core/annotations/index.dart';
-import 'package:d2_remote/core/utilities/repository.dart';
 import 'package:d2_remote/modules/auth/user/entities/d_user.entity.dart';
 import 'package:d2_remote/modules/auth/user/entities/d_user_authority.entity.dart';
+import 'package:d2_remote/modules/auth/user/repository/user_authority_repository.dart';
+import 'package:d2_remote/modules/auth/user/repository/user_repository.dart';
 import 'package:d2_remote/shared/queries/base.query.dart';
+import 'package:injectable/injectable.dart';
 import 'package:reflectable/reflectable.dart';
-import 'package:sqflite/sqflite.dart';
 
+@LazySingleton(/*as: BaseQuery<UserAuthority>*/)
 class UserQuery extends BaseQuery<User> {
-  UserQuery({Database? database}) : super(database: database);
+  final UserRepository dataSource;
+  final UserAuthorityRepository userAuthorityRepository;
+
+  UserQuery(this.dataSource, this.userAuthorityRepository) : super(dataSource);
 
   UserQuery withAuthorities() {
-    final userAuthority = Repository<UserAuthority>();
-    final Column? relationColumn = userAuthority.columns.firstWhere((column) =>
-        column.relation?.referencedEntity?.tableName == this.tableName);
+    final Column? relationColumn = userAuthorityRepository.columns.firstWhere(
+        (column) =>
+            column.relation?.referencedEntity?.tableName == this.tableName);
 
     if (relationColumn != null) {
       ColumnRelation relation = ColumnRelation(

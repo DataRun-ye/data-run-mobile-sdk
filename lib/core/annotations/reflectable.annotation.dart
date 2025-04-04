@@ -13,7 +13,8 @@ class AnnotationReflection extends Reflectable {
             typeCapability,
             superclassQuantifyCapability,
             // NMC
-            libraryCapability);
+            // libraryCapability
+  );
 }
 
 const AnnotationReflectable = AnnotationReflection();

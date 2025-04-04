@@ -1,15 +1,19 @@
 import 'package:d2_remote/core/annotations/index.dart';
 import 'package:d2_remote/modules/datarun/form/entities/metadata_submission.entity.dart';
+import 'package:d2_remote/modules/datarun/form/repository/metadata_submission_repository.dart';
 import 'package:d2_remote/shared/models/request_progress.model.dart';
 import 'package:d2_remote/shared/queries/base.query.dart';
 import 'package:d2_remote/shared/utilities/http_client.util.dart';
 import 'package:dio/dio.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:injectable/injectable.dart';
 
 @AnnotationReflectable
 @Query(type: QueryType.METADATA)
+@lazySingleton
 class MetadataSubmissionQuery extends BaseQuery<MetadataSubmission> {
-  MetadataSubmissionQuery({Database? database}) : super(database: database);
+  final MetadataSubmissionRepository dataSource;
+
+  MetadataSubmissionQuery(this.dataSource) : super(dataSource);
 
   @override
   Future<List<MetadataSubmission>?> download(
@@ -50,7 +54,7 @@ class MetadataSubmissionQuery extends BaseQuery<MetadataSubmission> {
     final dhisUrl = await this.dataRunUrl();
 
     final response = await HttpClient.get(dhisUrl,
-        database: this.database, dioTestClient: dioTestClient);
+        database: await this.dataSource.database, dioTestClient: dioTestClient);
 
     List data = response.body[this.apiResourceName]?.toList() ?? [];
 

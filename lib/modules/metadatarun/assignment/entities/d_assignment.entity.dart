@@ -41,6 +41,9 @@ class Assignment extends IdentifiableEntity {
   @legacy.Column(nullable: true, type: legacy.ColumnType.TEXT)
   EntityScope? scope;
 
+  @legacy.Column(nullable: true)
+  String orgUnitSearchTerms;
+
   Assignment(
       {String? id,
       // required String uid,
@@ -58,6 +61,7 @@ class Assignment extends IdentifiableEntity {
       this.startDay,
       this.startDate,
       this.scope,
+      required this.orgUnitSearchTerms,
       required dirty})
       : super(
             id: id,
@@ -109,6 +113,9 @@ class Assignment extends IdentifiableEntity {
                 ? json['orgUnit']
                 : json['orgUnit']['uid']
             : null,
+        orgUnitSearchTerms: json['orgUnitSearchTerms'] is String
+            ? json['orgUnitSearchTerms']
+            : '${json['orgUnit']['code']}-${json['orgUnit']?['displayName'] ?? json['orgUnit']['name']}',
         parent: json['parent'] != null
             ? json['parent'] is String
                 ? json['parent']
@@ -167,6 +174,9 @@ class Assignment extends IdentifiableEntity {
                 ? json['orgUnit']
                 : json['orgUnit']['uid']
             : null,
+        orgUnitSearchTerms: json['orgUnitSearchTerms'] is String
+            ? json['orgUnitSearchTerms']
+            : '${json['orgUnit']['code']}-${json['orgUnit']?['displayName'] ?? json['orgUnit']['name']}',
         parent: json['parent'] != null
             ? json['parent'] is String
                 ? json['parent']
@@ -196,6 +206,7 @@ class Assignment extends IdentifiableEntity {
     data['displayName'] = this.displayName;
     data['activity'] = this.activity;
     data['orgUnit'] = this.orgUnit;
+    data['orgUnitSearchTerms'] = this.orgUnitSearchTerms;
     data['team'] = this.team;
     data['status'] = this.status?.name;
     data['allocatedResources'] = jsonEncode(this.allocatedResources);

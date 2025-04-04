@@ -1,16 +1,19 @@
 import 'package:d2_remote/core/annotations/index.dart';
 import 'package:d2_remote/modules/datarun/form/entities/metadata_submission_update.dart';
+import 'package:d2_remote/modules/datarun/form/repository/metadata_submission_update_repository.dart';
 import 'package:d2_remote/shared/queries/base.query.dart';
 import 'package:dio/dio.dart';
+import 'package:injectable/injectable.dart';
 import 'package:queue/queue.dart';
-import 'package:sqflite/sqflite.dart';
 
 @AnnotationReflectable
 // @Query(type: QueryType.METADATA)
+@lazySingleton
 class MetadataSubmissionUpdateQuery
     extends BaseQuery<MetadataSubmissionUpdate> {
-  MetadataSubmissionUpdateQuery({Database? database})
-      : super(database: database);
+  final MetadataSubmissionUpdateRepository dataSource;
+  MetadataSubmissionUpdateQuery(this.dataSource)
+      : super(dataSource);
   Future<List<MetadataSubmissionUpdate>?> upload(List<String> submissionsIds,
       {Dio? dioTestClient}) async {
     List<MetadataSubmissionUpdate> syncableEntities =

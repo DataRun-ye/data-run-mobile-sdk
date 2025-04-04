@@ -2,9 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:d2_remote/modules/auth/user/entities/d_user.entity.dart';
-import 'package:d2_remote/modules/auth/user/queries/d_user.query.dart';
+import 'package:d2_remote/shared/queries/base.query.dart';
 import 'package:d2_remote/shared/utilities/http-details.util.dart';
 import 'package:dio/dio.dart';
+import 'package:get_it/get_it.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:xml2json/xml2json.dart';
 
@@ -202,7 +203,8 @@ class HttpClient {
     }
 
     // final User? user = await UserQuery(database: database).getOne();
-    final User? user = await UserQuery(database: database).getOne();
+    // final User? user = await UserQuery(database: database).getOne();
+    final User? user = await GetIt.I.get<BaseQuery<User>>().getOne();
 
     return base64Encode(utf8.encode('${user?.username}:${user?.password}'));
   }

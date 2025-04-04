@@ -1,8 +1,10 @@
+import 'dart:async';
+
 import 'package:d2_remote/core/annotations/index.dart';
-import 'package:d2_remote/core/database/database_manager.dart';
+import 'package:d2_remote/core/database/database_provider.dart';
 import 'package:d2_remote/core/datarun/utilities/date_helper.dart';
 import 'package:d2_remote/core/datarun/utilities/repository_d.dart';
-import 'package:d2_remote/core/utilities/repository_util.dart';
+import 'package:d2_remote/core/utilities/data_store_util.dart';
 import 'package:d2_remote/shared/entities/base.entity.dart';
 import 'package:d2_remote/shared/utilities/merge_mode.util.dart';
 import 'package:d2_remote/shared/utilities/query_filter.util.dart';
@@ -15,9 +17,12 @@ import 'package:sqflite/sqflite.dart';
 import '../../shared/utilities/save_option.util.dart';
 import 'query_expression.dart';
 
-class Repository<T extends BaseEntity> extends BaseRepositoryD<T> {
-  @override
-  Future<Database> get database => DatabaseManager.instance.database;
+class DataStore<T extends BaseEntity> extends BaseDataStore<T> {
+  final DatabaseProvider _dbProvider;
+
+  DataStore(this._dbProvider);
+
+  FutureOr<Database> get database => _dbProvider.database;
 
   @override
   Future<List<T>> findAll(
@@ -25,7 +30,11 @@ class Repository<T extends BaseEntity> extends BaseRepositoryD<T> {
       List<String>? fields,
       Map<String, SortOrder>? sortOrder,
       Database? database,
-      List<ColumnRelation>? relations}) async {
+      List<ColumnRelation>? relations,
+      // NMC
+      LogicalOperator operator = LogicalOperator.AND,
+      int? limit,
+      int? offset}) async {
     final Database db = database != null ? database : await this.database;
 
     return this.find(
@@ -33,7 +42,10 @@ class Repository<T extends BaseEntity> extends BaseRepositoryD<T> {
         fields: fields,
         sortOrder: sortOrder,
         database: db,
-        relations: relations);
+        relations: relations,
+        operator: operator,
+        offset: offset,
+        limit: limit);
   }
 
   @override
@@ -45,6 +57,7 @@ class Repository<T extends BaseEntity> extends BaseRepositoryD<T> {
       Database? database,
       List<ColumnRelation>? relations,
       // NMC
+      LogicalOperator operator = LogicalOperator.AND,
       int? limit,
       int? offset}) async {
     final Database db = database != null ? database : await this.database;
@@ -83,7 +96,7 @@ class Repository<T extends BaseEntity> extends BaseRepositoryD<T> {
     }
 
     final String? whereParameters =
-        QueryFilter.getWhereParameters(this.columns, filters);
+        QueryFilter.getWhereParameters(this.columns, filters, operator: operator);
     final String? orderParameters =
         SortOrderUtil.getSortOrderParameters(sortOrder);
 
@@ -573,18 +586,18 @@ class Repository<T extends BaseEntity> extends BaseRepositoryD<T> {
     return saveDataResponse;
   }
 
-  @override
+  // @override
   List<Column> get columns => Entity.getEntityColumns(
       AnnotationReflectable.reflectType(T) as ClassMirror, false);
 
-  @override
+  // @override
   List<Column> get oneToManyColumns => this
       .columns
       .where(
           (column) => column.relation?.relationType == RelationType.OneToMany)
       .toList();
 
-  @override
+  // @override
   String get createQuery => QueryExpression.getCreateTableExpression(
       this.entity.tableName, this.columns);
 
@@ -605,7 +618,7 @@ class Repository<T extends BaseEntity> extends BaseRepositoryD<T> {
     return 1;
   }
 
-  @override
+  // @override
   Entity get entity {
     return Entity.getEntityDefinition(
         AnnotationReflectable.reflectType(T) as ClassMirror);
@@ -662,8 +675,9 @@ class Repository<T extends BaseEntity> extends BaseRepositoryD<T> {
     return countResult[0]['count'] as int;
   }
 
-  Future<List<Map>> rawQuery({required String query}) async {
-    final Database db = await this.database;
+  Future<List<Map>> rawQuery(
+      {required String query, Database? database}) async {
+    final Database db = database != null ? database : await this.database;
 
     final List<Map> queryResult = await db.rawQuery(query.toString());
 

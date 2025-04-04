@@ -1,12 +1,15 @@
 import 'package:d2_remote/core/annotations/index.dart';
 import 'package:d2_remote/modules/metadatarun/org_unit/entities/org_unit.entity.dart';
+import 'package:d2_remote/modules/metadatarun/org_unit/repository/org_unit_repository.dart';
 import 'package:d2_remote/shared/queries/base.query.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:injectable/injectable.dart';
 
 @AnnotationReflectable
 @Query(type: QueryType.METADATA)
+@lazySingleton
 class OrgUnitQuery extends BaseQuery<OrgUnit> {
-  OrgUnitQuery({Database? database}) : super(database: database);
+  final OrgUnitRepository dataSource;
+  OrgUnitQuery(this.dataSource) : super(dataSource);
 
 // Download Tree Nodes entities
 // Future<List<OrgUnit>> downloadOrgUnits(Function(RequestProgress, bool) callback,
