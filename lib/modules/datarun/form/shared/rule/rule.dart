@@ -70,7 +70,7 @@ class Rule with EquatableMixin {
       'expression': expression,
       'action': action?.name,
       'ruleAction': ruleAction.toJson(),
-      'message': message != null ? jsonEncode(message?.unlock) : null,
+      'message': message?.unlock,
       'assignedValue': assignedValue,
       'filterInfo': filterInfo != null ? filterInfo!.toJson() : null,
     };
@@ -107,8 +107,8 @@ class FilterInfo {
 
   Map<String, dynamic> toJson() {
     return {
-      'optionsToHide': optionsToHide != null ? jsonEncode(optionsToHide) : null,
-      'optionsToShow': optionsToShow != null ? jsonEncode(optionsToShow) : null,
+      'optionsToHide': optionsToHide,
+      'optionsToShow': optionsToShow,
     };
   }
 }

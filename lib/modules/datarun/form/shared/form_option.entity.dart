@@ -25,13 +25,13 @@ class FormOption with EquatableMixin {
   factory FormOption.fromJson(Map<String, dynamic> json) {
     final properties = json['properties'] != null
         ? Map<String, dynamic>.from(json['properties'] is String
-            ? jsonDecode(json['properties'])
-            : json['properties'])
+        ? jsonDecode(json['properties'])
+        : json['properties'])
         : <String, dynamic>{};
 
     final label = json['label'] != null
         ? Map<String, String>.from(
-            json['label'] is String ? jsonDecode(json['label']) : json['label'])
+        json['label'] is String ? jsonDecode(json['label']) : json['label'])
         : <String, String>{"ar": json['name']};
     return FormOption(
       label: label.lock,
@@ -48,10 +48,10 @@ class FormOption with EquatableMixin {
     return {
       'code': code,
       'name': name,
-      'label': jsonEncode(label.unlockView),
+      'label': label.unlockView,
       'listName': listName,
       'filterExpression': filterExpression,
-      'properties': jsonEncode(properties?.unlockView),
+      'properties': properties?.unlockView,
       'order': order,
     };
   }
@@ -61,10 +61,10 @@ class FormOption with EquatableMixin {
 
     return filterExpression != null
         ? fieldPattern
-            .allMatches(filterExpression!)
-            .map((match) => match.group(1)!)
-            .toSet()
-            .toList()
+        .allMatches(filterExpression!)
+        .map((match) => match.group(1)!)
+        .toSet()
+        .toList()
         : [];
   }
 
