@@ -41,6 +41,15 @@ class Assignment extends IdentifiableEntity {
   @legacy.Column(nullable: true, type: legacy.ColumnType.TEXT)
   EntityScope? scope;
 
+  @legacy.Column(nullable: true, type: legacy.ColumnType.TEXT)
+  final String? orgUnitName;
+
+  @legacy.Column(nullable: true, type: legacy.ColumnType.TEXT)
+  final String? orgUnitCode;
+
+  @legacy.Column(nullable: true, type: legacy.ColumnType.TEXT)
+  final String? teamCode;
+
   Assignment(
       {String? id,
       // required String uid,
@@ -58,6 +67,9 @@ class Assignment extends IdentifiableEntity {
       this.startDay,
       this.startDate,
       this.scope,
+      this.orgUnitCode,
+      this.orgUnitName,
+      this.teamCode,
       required dirty})
       : super(
             id: id,
@@ -126,6 +138,9 @@ class Assignment extends IdentifiableEntity {
         startDate: json['startDate'],
         forms: forms,
         scope: scope,
+        orgUnitCode: json['orgUnitCode'],
+        orgUnitName: json['orgUnitName'],
+        teamCode: json['teamCode'],
         dirty: json['dirty']);
   }
 
@@ -144,6 +159,10 @@ class Assignment extends IdentifiableEntity {
     //     ? jsonDecode(json['forms']).cast<String>()
     //     : json['forms'].map<String>((item) => item.toString()).toList()
     //     : <String>[];
+
+    final orgUnitName = json['orgUnit']?['name'];
+    final orgUnitCode = json['orgUnit']?['code'];
+    final teamCode = json['team']?['code'];
 
     return Assignment(
         id: json['uid'],
@@ -184,6 +203,9 @@ class Assignment extends IdentifiableEntity {
         startDate: json['startDate'],
         forms: forms,
         scope: scope,
+        orgUnitCode: orgUnitCode,
+        orgUnitName: orgUnitName,
+        teamCode: teamCode,
         dirty: json['dirty']);
   }
 
@@ -206,6 +228,9 @@ class Assignment extends IdentifiableEntity {
     data['startDate'] = this.startDate;
     data['forms'] = jsonEncode(this.forms);
     data['scope'] = this.scope!.name;
+    data['orgUnitCode'] = this.orgUnitCode;
+    data['orgUnitName'] = this.orgUnitName;
+    data['teamCode'] = this.teamCode;
     data['dirty'] = this.dirty;
     return data;
   }

@@ -1,6 +1,6 @@
 import 'dart:convert';
+
 import 'package:d2_remote/core/annotations/index.dart' as legacy;
-import 'package:d2_remote/modules/datarun/form/entities/form_version.entity.dart';
 import 'package:d2_remote/modules/datarun/form/models/geometry.dart';
 import 'package:d2_remote/modules/datarun_shared/entities/syncable.entity.dart';
 import 'package:d2_remote/shared/enumeration/assignment_status.dart';
@@ -32,7 +32,7 @@ class DataFormSubmission extends SyncableEntity {
     /// Syncable
     required int version,
     String? form,
-    required dynamic formVersion,
+    required String formVersion,
     bool? deleted,
     bool? synced,
     bool? syncFailed,
@@ -103,9 +103,9 @@ class DataFormSubmission extends SyncableEntity {
     }
 
     final formVersion = json['formVersion'];
-    final List<String> formAndVersion = formVersion is String
-        ? formVersion.split('_')
-        : json['formVersion']['uid'].split('_');
+    // final List<String> formAndVersion = formVersion is String
+    //     ? formVersion.split('_')
+    //     : formVersion.id.split('_');
 
     return DataFormSubmission(
       id: json['uid'] ?? json['id'].toString(),
@@ -115,26 +115,14 @@ class DataFormSubmission extends SyncableEntity {
       createdDate: json['createdDate'],
       createdBy: json['createdBy'],
       lastModifiedDate: json['lastModifiedDate'],
-      // dataValues: (json['dataValues'] ?? [])
-      //     .map<DataValue>((dataValue) => DataValue.fromJson({
-      //           ...dataValue,
-      //           'dataSubmission': json['uid'] ?? json['id'],
-      //           'dirty': false
-      //         }))
-      //     .toList(),
-      // repeatInstances: (json['repeatInstances'] ?? [])
-      //     .map<DataValue>((repeatInstance) => DataValue.fromJson({
-      //           ...repeatInstance,
-      //           'dataSubmission': json['uid'] ?? json['id'],
-      //           'dirty': false
-      //         }))
-      //     .toList(),
       formData: parseFormData(json['formData']),
 
       /// Syncable
-      formVersion: json['formVersion'],
-      form: formAndVersion[0],
-      version: int.tryParse(formAndVersion[1])!,
+      // formVersion: '${json[formAndVersion[0]]}_${formAndVersion[1]}',
+      formVersion: formVersion as String,
+      form: json['form'] as String,
+      version: json['version'] as int,
+      // version: int.tryParse(formAndVersion[1])!,
       deleted: json['deleted'],
       synced: json['synced'],
       isFinal: json['isFinal'] ?? true,
@@ -231,8 +219,7 @@ class DataFormSubmission extends SyncableEntity {
       'formData': jsonEncode(formData),
 
       /// Syncable
-      'formVersion':
-          formVersion.runtimeType == FormVersion ? formVersion.id : formVersion,
+      'formVersion': formVersion,
       'form': form,
       'version': version,
       'deleted': this.deleted,

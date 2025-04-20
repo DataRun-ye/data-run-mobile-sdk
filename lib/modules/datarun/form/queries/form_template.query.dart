@@ -71,7 +71,7 @@ class FormTemplateQuery extends BaseQuery<FormTemplate> {
         database: this.database, dioTestClient: dioTestClient);
 
     List data;
-    data = response.body[this.apiResourceName]?.toList();
+    data = response.body[this.apiResourceName]?.toList() ?? [];
 
     List<Map<String, dynamic>> forms = [];
 

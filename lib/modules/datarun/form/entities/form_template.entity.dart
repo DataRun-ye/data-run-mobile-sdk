@@ -8,7 +8,7 @@ import 'package:d2_remote/modules/datarun_shared/utilities/parsing_helpers.dart'
 import 'package:d2_remote/shared/entities/identifiable.entity.dart';
 
 @legacy.AnnotationReflectable
-@legacy.Entity(tableName: 'formTemplate', apiResourceName: 'dataForm')
+@legacy.Entity(tableName: 'formTemplate', apiResourceName: 'dataFormTemplates')
 class FormTemplate extends IdentifiableEntity {
   /// template latest Version
   @legacy.Column(nullable: false, type: legacy.ColumnType.INTEGER)
@@ -20,24 +20,18 @@ class FormTemplate extends IdentifiableEntity {
   @legacy.OneToMany(table: FormVersion)
   List<FormVersion>? formVersions;
 
-  // @legacy.ManyToOne(table: Activity, joinColumnName: 'team')
-  // dynamic team;
-
   FormTemplate({
     String? id,
-    // String? uid,
     String? name,
     String? code,
     String? createdDate,
     String? lastModifiedDate,
     required this.version,
     this.formVersions,
-    // this.team,
     Map<String, String> label = const {},
     required dirty,
   }) : super(
           id: id,
-          // uid: uid,
           name: name,
           code: code,
           createdDate: createdDate,
@@ -49,9 +43,6 @@ class FormTemplate extends IdentifiableEntity {
 
   // From JSON string (Database and API)
   factory FormTemplate.fromJson(Map<String, dynamic> json) {
-    // final team =
-    //     json['team'] is String ? json['team'] : json['team']['uid'];
-
     return FormTemplate(
       id: json['uid'] ?? json['id'].toString(),
       formVersions: List<dynamic>.from(json['formVersions'] ?? [])
@@ -62,7 +53,6 @@ class FormTemplate extends IdentifiableEntity {
                 'formTemplate': formVersion['formTemplate'],
               }))
           .toList(),
-      // uid: json['uid'],
       code: json['code'],
       name: json['name'],
       label: json['label'] != null
@@ -93,23 +83,20 @@ class FormTemplate extends IdentifiableEntity {
             DOptionSet(listName: e.key, options: e.value.toList()).toJson())
         .toList();
 
+    final formId = (json['uid'] ?? json['id']?.toString());
     return FormTemplate(
-      id: json['uid'],
-      // id: json['uid'],
+      id: formId,
       formVersions: List<dynamic>.from(json['formVersions'] ?? [])
           .map((formVersion) => FormVersion.fromApi({
                 ...formVersion,
-                'id': '${formVersion['uid']}_${json['version']}',
-                'uid': '${formVersion['uid']}_${json['version']}',
-                'formTemplate': json['uid'],
+                'id': '${formId}_${json['version']}',
+                'uid': '${formId}_${json['version']}',
+                'formTemplate': formId,
                 'version': json['version'],
-                // 'activity': formVersion['activity'],
-                // 'team': formVersion['team'],
                 'optionSets': optionSets,
                 'dirty': false
               }))
           .toList(),
-      // uid: json['uid'],
       code: json['code'],
       name: json['name'],
       label: json['label'] != null
@@ -117,7 +104,6 @@ class FormTemplate extends IdentifiableEntity {
               ? jsonDecode(json['label'])
               : json['label'])
           : {"en": json['name']},
-      // team: team,
       version: json['version'],
       createdDate: json['createdDate'],
       lastModifiedDate: json['lastModifiedDate'],

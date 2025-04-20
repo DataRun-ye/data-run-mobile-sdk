@@ -1,7 +1,5 @@
 import 'dart:convert';
 
-import 'package:d2_remote/modules/datarun/form/shared/field_template/json_factory.dart';
-import 'package:d2_remote/modules/datarun/form/shared/field_template/field_template.entity.dart';
 import 'package:d2_remote/modules/datarun/form/shared/field_template/template.dart';
 import 'package:d2_remote/modules/datarun/form/shared/rule/rule.dart';
 import 'package:d2_remote/modules/datarun/form/shared/value_type.dart';
@@ -11,17 +9,17 @@ import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 class SectionTemplate extends Template {
   final String? id;
   final String? code;
-  final String? path;
+  final String path;
   final String? description;
 
   final String? name;
   final int order;
 
-  final ValueType type;
+  final ValueType? type;
   final String? fieldValueRenderingType;
   final String? parent;
 
-  final IList<Template> fields;
+  // final IList<Template> fields;
   final IMap<String, dynamic> label;
 
   final IMap<String, dynamic>? properties;
@@ -32,16 +30,16 @@ class SectionTemplate extends Template {
   final IMap<String, String>? constraintMessage;
   final String? itemTitle;
   final bool readOnly;
-  final bool isRepeat;
+  final bool repeatable;
   final int? maxRepeats;
   final int? minRepeats;
 
-  final IList<Template> treeFields;
+  final List<Template> children;
 
   SectionTemplate({
     this.id,
     this.code,
-    this.path,
+    required this.path,
     this.description,
     this.order = 0,
     this.type = ValueType.Section,
@@ -50,20 +48,17 @@ class SectionTemplate extends Template {
     this.parent,
     this.itemTitle,
     this.readOnly = false,
-    this.isRepeat = false,
+    this.repeatable = false,
     this.maxRepeats,
     this.minRepeats,
     this.constraint,
     this.constraintMessage,
     Iterable<Rule>? rules,
-    Iterable<Template>? fields,
-    Iterable<Template>? treeFields,
+    // Iterable<Template>? fields,
+    Iterable<Template>? children,
     this.label = const IMap.empty(),
     this.properties,
-  })  : this.fields =
-            IList.orNull(fields) ?? const IList<FieldTemplate>.empty(),
-        this.treeFields =
-            IList.orNull(fields) ?? const IList<FieldTemplate>.empty(),
+  })  : this.children = children?.toList() ?? const [],
         this.rules = IList.orNull(rules) ?? const IList<Rule>.empty();
 
   @override
@@ -79,18 +74,13 @@ class SectionTemplate extends Template {
             .toList()
         : <Rule>[];
 
-    final fields = json['fields'] != null
-        ? (parseDynamicJson(json['fields']) as List)
-            .map<Template>((field) => TemplateJsonFactory.fromJsonFactory({
-                  ...field,
-                  "optionMap": json['optionMap'],
-                  "parent": valueType.isRepeatSection
-                      ? '${json['path']}.{key}'
-                      : json['path'],
-                }))
+    final children = json['children'] != null
+        ? (parseDynamicJson(json['children']) as List)
+            .map<Template>((field) => Template.fromJsonFactory(
+                {...field, "optionMap": json['optionMap']}))
             .toList()
         : <Template>[];
-    final treeFields = <Template>[];
+    // final treeFields = <Template>[];
 
     final label = json['label'] != null
         ? Map<String, String?>.from(
@@ -121,15 +111,14 @@ class SectionTemplate extends Template {
         maxRepeats: json['maxRepeats'],
         minRepeats: json['minRepeats'],
         readOnly: json['readOnly'] ?? false,
-        isRepeat: json['isRepeat'] ?? valueType.isRepeatSection ?? false,
+        repeatable: json['repeatable'] ?? valueType.isRepeatSection ?? false,
         itemTitle: json['itemTitle'],
         order: json['order'] ?? 0,
-        fields: fields,
-        treeFields: treeFields,
+        children: children,
         rules: rules,
         label: label.lock,
         properties: properties.lock,
-        parent: json['section'],
+        parent: json['parent'],
         fieldValueRenderingType: json['fieldValueRenderingType']);
   }
 
@@ -137,30 +126,30 @@ class SectionTemplate extends Template {
     return {
       'id': id,
       'code': code,
-      'type': type.name,
       'order': order,
       'path': path,
       'name': name,
       'description': description,
       'readOnly': readOnly,
-      'isRepeat': isRepeat,
+      'repeatable': repeatable,
       'maxRepeats': maxRepeats,
       'minRepeats': minRepeats,
       'fieldValueRenderingType': fieldValueRenderingType,
-      'fields': jsonEncode(fields.unlockView
-          .map((field) => TemplateJsonFactory.toJsonFactory(field))
-          .toList()),
-      'treeFields': jsonEncode(treeFields.unlockView
-          .map((field) => TemplateJsonFactory.toJsonFactory(field))
-          .toList()),
-      'rules':
-          jsonEncode(rules.unlockView.map((rule) => rule.toJson()).toList()),
-      'label': jsonEncode(label.unlockView),
-      'properties': jsonEncode(properties?.unlockView),
+      // 'fields': jsonEncode(treeFields.unlockView
+      //     .map((field) => TemplateJsonFactory.toJsonFactory(field))
+      //     .toList()),
+      'children': children.map((field) => field.toJson()).toList(),
+      // jsonEncode(
+      //     children.map((field) => field.toJson()).toList()),
+      'rules': rules.unlockView.map((rule) => rule.toJson()).toList(),
+      // jsonEncode(rules.unlockView.map((rule) => rule.toJson()).toList()),
+      'label': label.unlock, //jsonEncode(label.unlockView),
+      // 'properties': jsonEncode(properties?.unlockView),
       'constraint': constraint,
-      'constraintMessage': constraintMessage != null
+      'constraintMessage': constraintMessage!.unlockView,
+      /*constraintMessage != null
           ? jsonEncode(constraintMessage!.unlockView)
-          : null,
+          : null,*/
       'parent': parent,
     };
   }
@@ -174,8 +163,8 @@ class SectionTemplate extends Template {
     String? code,
     bool? mainField,
     Iterable<Rule>? rules,
-    Iterable<Template>? fields,
-    Iterable<Template>? treeFields,
+    // Iterable<Template>? fields,
+    Iterable<Template>? children,
     ValueType? type,
     IMap<String, dynamic>? label,
     IMap<String, dynamic>? properties,
@@ -185,7 +174,7 @@ class SectionTemplate extends Template {
     String? fieldValueRenderingType,
     String? parent,
     String? itemTitle,
-    bool? isRepeat,
+    bool? repeatable,
     int? maxRepeats,
     int? minRepeats,
   }) {
@@ -200,8 +189,8 @@ class SectionTemplate extends Template {
       fieldValueRenderingType:
           fieldValueRenderingType ?? this.fieldValueRenderingType,
       parent: parent ?? this.parent,
-      fields: fields ?? this.fields,
-      treeFields: treeFields ?? this.fields,
+      // fields: fields ?? this.fields,
+      children: children ?? this.children,
       label: label ?? this.label,
       properties: properties ?? this.properties,
       rules: rules ?? this.rules,
@@ -209,7 +198,7 @@ class SectionTemplate extends Template {
       constraintMessage: constraintMessage ?? this.constraintMessage,
       itemTitle: itemTitle ?? this.itemTitle,
       readOnly: readOnly ?? this.readOnly,
-      isRepeat: isRepeat ?? this.isRepeat,
+      repeatable: repeatable ?? this.repeatable,
       maxRepeats: maxRepeats ?? this.maxRepeats,
       minRepeats: minRepeats ?? this.minRepeats,
     );

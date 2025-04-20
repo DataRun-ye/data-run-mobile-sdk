@@ -22,9 +22,12 @@ class OptionSet extends IdentifiableEntity {
       Iterable<FormOption>? options,
       required dirty})
       : this.options = IList.orNull(options) ?? const IList<FormOption>.empty(),
-        super(id: id,
-          // uid: uid,
-          name: name, code: code, dirty: dirty);
+        super(
+            id: id,
+            // uid: uid,
+            name: name,
+            code: code,
+            dirty: dirty);
 
   factory OptionSet.fromJson(Map<String, dynamic> json) {
     final options = json['options'] != null
@@ -52,7 +55,7 @@ class OptionSet extends IdentifiableEntity {
       'name': this.name,
       'createdDate': this.createdDate,
       'lastModifiedDate': this.lastModifiedDate,
-      'label': jsonEncode(options.unlockView),
+      'options': jsonEncode(options.unlockView),
       'dirty': this.dirty
     };
   }

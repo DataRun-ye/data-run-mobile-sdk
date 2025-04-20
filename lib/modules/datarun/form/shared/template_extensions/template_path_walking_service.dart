@@ -25,10 +25,11 @@ mixin TemplatePathWalkingService<T extends TreeElement> {
     //     path.endsWith('.') ? path.substring(0, path.length - 1) : path;
 
     final depth = path.split('.').length + 1;
-    return flatFieldsList.where((node) {
+    final childElements = flatFieldsList.where((node) {
       return node.path!.startsWith('$path.') &&
           node.path!.split('.').length == depth;
     }).toList();
+    return childElements;
   }
 
   /// Get ancestors of a specific path
@@ -47,9 +48,9 @@ mixin TemplatePathWalkingService<T extends TreeElement> {
   }
 
   /// Get descendants of a specific path
-  T? getFirstByName(String name) {
+  T? getFirstById(String id) {
     final element =
-        flatFieldsList.firstOrNullWhere((node) => node.path!.endsWith('$name'));
+        flatFieldsList.firstOrNullWhere((node) => node.path!.endsWith('$id'));
     return element;
   }
 

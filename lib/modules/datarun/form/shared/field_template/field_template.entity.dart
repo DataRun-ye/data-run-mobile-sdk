@@ -22,7 +22,7 @@ class FieldTemplate extends Template
     with ElementAttributesMixin, EquatableMixin {
   final String? id;
   final String? description;
-  final String? path;
+  final String path;
 
   final String? code;
   final String? name;
@@ -65,7 +65,7 @@ class FieldTemplate extends Template
     this.id,
     this.code,
     this.description,
-    this.path,
+    required this.path,
     this.mandatory = false,
     this.mainField = false,
     this.readOnly = false,
@@ -142,15 +142,15 @@ class FieldTemplate extends Template
             .toList()
         : <AllowedAction>[];
 
-    final optionMap = json['optionMap'] != null
-        ? Map<String, List<FormOption>>.from(json['optionMap'] is String
-            ? jsonDecode(json['optionMap'])
-            : json['optionMap'])
-        : <String, List<FormOption>>{};
+    // final optionMap = json['optionMap'] != null
+    //     ? Map<String, List<FormOption>>.from(json['optionMap'] is String
+    //         ? jsonDecode(json['optionMap'])
+    //         : json['optionMap'])
+    //     : <String, List<FormOption>>{};
 
-    final listName = json['listName'];
+    // final listName = json['listName'];
 
-    final options = optionMap[listName] ?? [];
+    // final options = optionMap[listName] ?? [];
 
     final label = json['label'] != null
         ? Map<String, String?>.from(
@@ -188,7 +188,7 @@ class FieldTemplate extends Template
       name: json['name'],
       code: json['code'],
       description: json['description'],
-      options: options,
+      // options: options,
       allowedActions: allowedActions,
       displayAttributes: displayAttributes,
       path: json['path'],
@@ -206,7 +206,7 @@ class FieldTemplate extends Template
       rules: rules,
       label: label.lock,
       properties: properties.lock,
-      parent: json['section'],
+      parent: json['parent'],
       // parentPath: json['parentPath'],
       resourceType: resourceType,
       resourceMetadataSchema: json['resourceMetadataSchema'],
@@ -233,8 +233,9 @@ class FieldTemplate extends Template
       'path': path,
       'name': name,
       'description': description,
-      'options': jsonEncode(
-          options.unlockView.map((option) => option.toJson()).toList()),
+      'options': options.unlockView.map((option) => option.toJson()).toList(),
+      /*jsonEncode(
+          options.unlockView.map((option) => option.toJson()).toList()),*/
       'mandatory': mandatory,
       'readOnly': readOnly,
       'mainField': mainField,
@@ -248,19 +249,20 @@ class FieldTemplate extends Template
       // 'fieldValueRenderingType': fieldValueRenderingType,
       // 'fields':
       //     jsonEncode(fields.unlockView.map((field) => field.toJson()).toList()),
-      'rules':
-          jsonEncode(rules.unlockView.map((rule) => rule.toJson()).toList()),
-      'label': jsonEncode(label.unlockView),
+      'rules': rules.unlockView.map((rule) => rule.toJson()).toList(),
+      // jsonEncode(rules.unlockView.map((rule) => rule.toJson()).toList()),
+      'label': label.unlockView,
+      //jsonEncode(label.unlockView),
       'constraint': constraint,
-      'constraintMessage': constraintMessage != null
+      'constraintMessage': constraintMessage?.unlockView,
+      /*constraintMessage != null
           ? jsonEncode(constraintMessage!.unlockView)
-          : null,
-      'properties': jsonEncode(properties?.unlockView),
+          : null,*/
+      // 'properties': jsonEncode(properties?.unlockView),
       'parent': parent,
-      'appearance': jsonEncode(appearance.unlockView),
-      'scannedCodeProperties': scannedCodeProperties?.toJson() != null
-          ? jsonEncode(scannedCodeProperties!.toJson())
-          : null,
+      'appearance': appearance.unlockView,
+      //jsonEncode(appearance.unlockView),
+      'scannedCodeProperties': scannedCodeProperties?.toJson(),
     };
   }
 
@@ -333,4 +335,7 @@ class FieldTemplate extends Template
       allowedActions: allowedActions ?? this.allowedActions,
     );
   }
+
+  @override
+  bool get repeatable => false;
 }

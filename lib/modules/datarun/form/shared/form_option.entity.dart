@@ -76,7 +76,7 @@ class FormOption with EquatableMixin {
     return {
       'code': code,
       'name': name,
-      'label': label,
+      'label': label.unlock,
       'listName': listName,
       ...?properties?.unlockView,
       'filterExpression': evalFilterExpression,

@@ -141,12 +141,12 @@ enum ValueType {
 
   static ValueType getValueType(String? valueType) {
     switch (valueType?.toLowerCase()) {
-      case 'section':
-        return ValueType.Section;
+      // case 'section':
+      //   return ValueType.Section;
+      // case 'repeatablesection':
+      //   return ValueType.RepeatableSection;
       case 'scannedcode':
         return ValueType.ScannedCode;
-      case 'repeatablesection':
-        return ValueType.RepeatableSection;
       case 'text':
         return ValueType.Text;
       case 'longtext':

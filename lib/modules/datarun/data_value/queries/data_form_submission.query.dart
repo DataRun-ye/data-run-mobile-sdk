@@ -10,7 +10,7 @@ import 'package:dio/dio.dart';
 import 'package:sqflite/sqflite.dart';
 
 @AnnotationReflectable
-@Query(type: QueryType.METADATA)
+// @Query(type: QueryType.METADATA)
 class FormSubmissionQuery extends SyncableQuery<DataFormSubmission> {
   FormSubmissionQuery({Database? database}) : super(database: database);
 
