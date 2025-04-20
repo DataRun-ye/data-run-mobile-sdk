@@ -1,6 +1,5 @@
 import 'package:d2_remote/core/annotations/index.dart' as legacy;
 import 'package:d2_remote/modules/datarun/form/models/geometry.dart';
-import 'package:d2_remote/modules/datarun/form/entities/form_version.entity.dart';
 import 'package:d2_remote/modules/metadatarun/teams/entities/d_team.entity.dart';
 import 'package:d2_remote/shared/entities/base.entity.dart';
 import 'package:d2_remote/shared/enumeration/assignment_status.dart';

@@ -28,8 +28,6 @@ abstract class Template with EquatableMixin, TreeElement {
 
   IList<Rule>? get rules;
 
-  // IList<Template> get fields => const IList.empty();
-
   final List<Template> children = [];
 
   ValueType? get type;
@@ -62,25 +60,6 @@ abstract class Template with EquatableMixin, TreeElement {
         readOnly,
         constraint
       ];
-
-  // Template copyWith({
-  //   String? id,
-  //   String? description,
-  //   String? path,
-  //   int? order,
-  //   String? name,
-  //   String? code,
-  //   bool? mainField,
-  //   Iterable<Rule>? rules,
-  //   Iterable<Template>? fields,
-  //   Iterable<Template>? treeFields,
-  //   ValueType? type,
-  //   IMap<String, dynamic>? label,
-  //   IMap<String, dynamic>? properties,
-  //   bool? readOnly,
-  //   String? constraint,
-  //   IMap<String, String>? constraintMessage,
-  // });
 
   static Template fromJsonFactory(Map<String, dynamic> json) {
     final type = json['type'] as String?;

@@ -1,4 +1,3 @@
-import 'package:d2_remote/core/annotations/nmc/query.annotation.dart';
 import 'package:d2_remote/core/annotations/reflectable.annotation.dart';
 import 'package:d2_remote/core/datarun/utilities/date_helper.dart';
 import 'package:d2_remote/modules/datarun/data_value/entities/data_form_submission.entity.dart';

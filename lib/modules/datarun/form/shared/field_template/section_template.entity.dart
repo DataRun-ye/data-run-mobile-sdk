@@ -11,21 +11,14 @@ class SectionTemplate extends Template {
   final String? code;
   final String path;
   final String? description;
-
   final String? name;
   final int order;
-
   final ValueType? type;
   final String? fieldValueRenderingType;
   final String? parent;
-
-  // final IList<Template> fields;
   final IMap<String, dynamic> label;
-
   final IMap<String, dynamic>? properties;
-
   final IList<Rule> rules;
-
   final String? constraint;
   final IMap<String, String>? constraintMessage;
   final String? itemTitle;
@@ -33,7 +26,6 @@ class SectionTemplate extends Template {
   final bool repeatable;
   final int? maxRepeats;
   final int? minRepeats;
-
   final List<Template> children;
 
   SectionTemplate({
@@ -54,7 +46,6 @@ class SectionTemplate extends Template {
     this.constraint,
     this.constraintMessage,
     Iterable<Rule>? rules,
-    // Iterable<Template>? fields,
     Iterable<Template>? children,
     this.label = const IMap.empty(),
     this.properties,
@@ -80,7 +71,6 @@ class SectionTemplate extends Template {
                 {...field, "optionMap": json['optionMap']}))
             .toList()
         : <Template>[];
-    // final treeFields = <Template>[];
 
     final label = json['label'] != null
         ? Map<String, String?>.from(
@@ -135,21 +125,12 @@ class SectionTemplate extends Template {
       'maxRepeats': maxRepeats,
       'minRepeats': minRepeats,
       'fieldValueRenderingType': fieldValueRenderingType,
-      // 'fields': jsonEncode(treeFields.unlockView
-      //     .map((field) => TemplateJsonFactory.toJsonFactory(field))
-      //     .toList()),
       'children': children.map((field) => field.toJson()).toList(),
-      // jsonEncode(
-      //     children.map((field) => field.toJson()).toList()),
       'rules': rules.unlockView.map((rule) => rule.toJson()).toList(),
-      // jsonEncode(rules.unlockView.map((rule) => rule.toJson()).toList()),
-      'label': label.unlock, //jsonEncode(label.unlockView),
-      // 'properties': jsonEncode(properties?.unlockView),
+      'label': label.unlock,
+      'properties': properties?.unlockView,
       'constraint': constraint,
       'constraintMessage': constraintMessage!.unlockView,
-      /*constraintMessage != null
-          ? jsonEncode(constraintMessage!.unlockView)
-          : null,*/
       'parent': parent,
     };
   }
