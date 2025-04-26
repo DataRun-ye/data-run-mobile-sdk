@@ -62,7 +62,7 @@ extension FormTraverseExtension on FormVersion {
         .toList();
   }
 
-  Template? getScopedDependencyByName(String id, String currentPath) {
+  Template? getScopedDependencyById(String id, String currentPath) {
     final pathSegments = currentPath.split('.');
 
     // upwards in the path
