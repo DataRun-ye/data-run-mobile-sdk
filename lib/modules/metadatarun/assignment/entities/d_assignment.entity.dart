@@ -227,7 +227,7 @@ class Assignment extends IdentifiableEntity {
     data['startDay'] = this.startDay;
     data['startDate'] = this.startDate;
     data['forms'] = jsonEncode(this.forms);
-    data['scope'] = this.scope!.name;
+    data['scope'] = this.scope?.name;
     data['orgUnitCode'] = this.orgUnitCode;
     data['orgUnitName'] = this.orgUnitName;
     data['teamCode'] = this.teamCode;
