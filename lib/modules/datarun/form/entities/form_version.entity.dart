@@ -51,9 +51,12 @@ class FormVersion extends IdentifiableEntity
   @legacy.Column(type: legacy.ColumnType.TEXT, nullable: false)
   ValidationStrategy validationStrategy;
 
+  @legacy.Column(nullable: true, type: legacy.ColumnType.TEXT)
+  String? versionUid;
+
   /// current Version
   @legacy.Column(nullable: false, type: legacy.ColumnType.INTEGER)
-  int version;
+  int versionNumber;
 
   // @legacy.Column(nullable: true, type: legacy.ColumnType.TEXT)
   // List<Template> flattenedFields = [];
@@ -67,7 +70,8 @@ class FormVersion extends IdentifiableEntity
     String? lastModifiedDate,
     this.description,
     this.formTemplate,
-    required this.version,
+    required this.versionNumber,
+    required this.versionUid,
     required this.defaultLocal,
     required this.validationStrategy,
     Iterable<Template> treeFields = const [],
@@ -141,7 +145,8 @@ class FormVersion extends IdentifiableEntity
       code: json['code'],
       name: json['name'],
       validationStrategy: validationStrategy,
-      version: json['version'],
+      versionNumber: json['versionNumber'],
+      versionUid: json['versionUid'],
       formTemplate: json['formTemplate'],
       label: json['label'] != null
           ? Map<String, String>.from(json['label'] is String
@@ -203,7 +208,8 @@ class FormVersion extends IdentifiableEntity
       code: json['code'],
       name: json['name'],
       validationStrategy: validationStrategy,
-      version: json['version'],
+      versionNumber: json['versionNumber'],
+      versionUid: json['versionUid'],
       formTemplate: json['formTemplate'],
       label: json['label'] != null
           ? Map<String, String>.from(json['label'] is String
@@ -231,7 +237,8 @@ class FormVersion extends IdentifiableEntity
       'code': code,
       'name': name,
       'validationStrategy': validationStrategy.name,
-      'version': version,
+      'versionNumber': versionNumber,
+      'versionUid': versionUid,
       'formTemplate': formTemplate,
       'label': jsonEncode(label),
       'defaultLocal': defaultLocal,

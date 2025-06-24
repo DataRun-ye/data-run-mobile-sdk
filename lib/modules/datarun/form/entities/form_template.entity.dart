@@ -12,7 +12,11 @@ import 'package:d2_remote/shared/entities/identifiable.entity.dart';
 class FormTemplate extends IdentifiableEntity {
   /// template latest Version
   @legacy.Column(nullable: false, type: legacy.ColumnType.INTEGER)
-  int version;
+  int versionNumber;
+
+  /// template latest Version
+  @legacy.Column(nullable: false, type: legacy.ColumnType.TEXT)
+  String versionUid;
 
   @legacy.Column(nullable: false, type: legacy.ColumnType.TEXT)
   Map<String, String> label = {};
@@ -26,7 +30,8 @@ class FormTemplate extends IdentifiableEntity {
     String? code,
     String? createdDate,
     String? lastModifiedDate,
-    required this.version,
+    required this.versionNumber,
+    required this.versionUid,
     this.formVersions,
     Map<String, String> label = const {},
     required dirty,
@@ -61,7 +66,8 @@ class FormTemplate extends IdentifiableEntity {
               : json['label'])
           : {"en": json['name']},
       // team: team,
-      version: json['version'],
+      versionNumber: json['versionNumber'],
+      versionUid: json['versionUid'],
       createdDate: json['createdDate'],
       lastModifiedDate: json['lastModifiedDate'],
       dirty: json['dirty'] ?? false,
@@ -104,7 +110,8 @@ class FormTemplate extends IdentifiableEntity {
               ? jsonDecode(json['label'])
               : json['label'])
           : {"en": json['name']},
-      version: json['version'],
+      versionNumber: json['versionNumber'],
+      versionUid: json['versionUid'],
       createdDate: json['createdDate'],
       lastModifiedDate: json['lastModifiedDate'],
       dirty: json['dirty'] ?? false,
@@ -118,7 +125,8 @@ class FormTemplate extends IdentifiableEntity {
       'uid': id,
       'code': code,
       'name': name,
-      'version': version,
+      'versionNumber': versionNumber,
+      'versionUid': versionUid,
       // 'team': team,
       'label': jsonEncode(label),
       'formVersions': formVersions,
