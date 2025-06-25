@@ -20,7 +20,7 @@ class HttpResponse {
 
 class HttpClient {
   // Data Run
-  static final String apiPath = '/api/custom/';
+  static final String apiPath = '/api/v1/';
 
   findById() {}
 

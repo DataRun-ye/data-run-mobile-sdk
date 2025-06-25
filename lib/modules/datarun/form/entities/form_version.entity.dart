@@ -30,8 +30,8 @@ class FormVersion extends IdentifiableEntity
   @legacy.Column(nullable: true, type: legacy.ColumnType.TEXT)
   List<FormOption> options = [];
 
-  @legacy.Column(nullable: true, type: legacy.ColumnType.TEXT)
-  List<DOptionSet> optionSets = [];
+  // @legacy.Column(nullable: true, type: legacy.ColumnType.TEXT)
+  // List<DOptionSet> optionSets = [];
 
   @legacy.Column(nullable: false, type: legacy.ColumnType.TEXT)
   Map<String, String> label = {};
@@ -51,8 +51,8 @@ class FormVersion extends IdentifiableEntity
   @legacy.Column(type: legacy.ColumnType.TEXT, nullable: false)
   ValidationStrategy validationStrategy;
 
-  @legacy.Column(nullable: true, type: legacy.ColumnType.TEXT)
-  String? versionUid;
+  @legacy.Column(nullable: false, type: legacy.ColumnType.TEXT)
+  String versionUid;
 
   /// current Version
   @legacy.Column(nullable: false, type: legacy.ColumnType.INTEGER)
@@ -96,7 +96,7 @@ class FormVersion extends IdentifiableEntity
           dirty: dirty,
         ) {
     this.options.addAll(options);
-    this.optionSets.addAll(optionSets);
+    // this.optionSets.addAll(optionSets);
     this.label.addAll(label);
   }
 
@@ -253,8 +253,8 @@ class FormVersion extends IdentifiableEntity
           jsonEncode(sections.unlock.map((field) => field.toJson()).toList()),
       // jsonEncode(sections.unlock.map((field) => field.toJson()).toList()),
       'options': jsonEncode(options.map((option) => option.toJson()).toList()),
-      'optionSets': jsonEncode(
-          optionSets.map((optionSet) => optionSet.toJson()).toList()),
+      // 'optionSets': jsonEncode(
+      //     optionSets.map((optionSet) => optionSet.toJson()).toList()),
       'createdDate': createdDate,
       'lastModifiedDate': lastModifiedDate,
       'dirty': dirty,

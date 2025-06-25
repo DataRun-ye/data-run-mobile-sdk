@@ -2,9 +2,6 @@ import 'dart:convert';
 
 import 'package:d2_remote/core/annotations/index.dart' as legacy;
 import 'package:d2_remote/modules/datarun/form/entities/form_version.entity.dart';
-import 'package:d2_remote/modules/datarun/form/shared/form_option.entity.dart';
-import 'package:d2_remote/modules/datarun/form/shared/option_set.entity.dart';
-import 'package:d2_remote/modules/datarun_shared/utilities/parsing_helpers.dart';
 import 'package:d2_remote/shared/entities/identifiable.entity.dart';
 
 @legacy.AnnotationReflectable
@@ -75,19 +72,19 @@ class FormTemplate extends IdentifiableEntity {
   }
 
   factory FormTemplate.fromApi(Map<String, dynamic> json) {
-    final options = json['options'] != null
-        ? (parseDynamicJson(json['options']) as List)
-            .map((option) => FormOption.fromJson(option))
-            .toList()
-        : <FormOption>[];
+    // final options = json['options'] != null
+    //     ? (parseDynamicJson(json['options']) as List)
+    //         .map((option) => FormOption.fromJson(option))
+    //         .toList()
+    //     : <FormOption>[];
 
-    final optionSets = Map.fromIterable(options,
-            key: (item) => item.listName,
-            value: (item) => options.where((t) => t.listName == item.listName))
-        .entries
-        .map((e) =>
-            DOptionSet(listName: e.key, options: e.value.toList()).toJson())
-        .toList();
+    // final optionSets = Map.fromIterable(options,
+    //         key: (item) => item.listName,
+    //         value: (item) => options.where((t) => t.listName == item.listName))
+    //     .entries
+    //     .map((e) =>
+    //         DOptionSet(listName: e.key, options: e.value.toList()).toJson())
+    //     .toList();
 
     final formId = (json['uid'] ?? json['id']?.toString());
     return FormTemplate(
@@ -95,11 +92,11 @@ class FormTemplate extends IdentifiableEntity {
       formVersions: List<dynamic>.from(json['formVersions'] ?? [])
           .map((formVersion) => FormVersion.fromApi({
                 ...formVersion,
-                'id': '${formId}_${json['version']}',
-                'uid': '${formId}_${json['version']}',
+                'id': json['versionUid']!,
+                'uid': json['versionUid']!,
                 'formTemplate': formId,
-                'version': json['version'],
-                'optionSets': optionSets,
+                'versionNumber': json['versionNumber']!,
+                // 'optionSets': optionSets,
                 'dirty': false
               }))
           .toList(),

@@ -30,9 +30,9 @@ abstract class SyncableQuery<T extends SyncableEntity> extends BaseQuery<T> {
 
   SyncableQuery<T> byFormTemplate(String form) {
     this.form = form;
-    this.version = version;
-    final value = '${form}${version != null ? '_$version' : ''}%';
-    return this.like(attribute: 'formVersion', value: value);
+    // this.version = version;
+    // final value = '${form}${version != null ? '_$version' : ''}%';
+    return this.like(attribute: 'form', value: form);
   }
 
   /// Not Synced to server at all, no available on server

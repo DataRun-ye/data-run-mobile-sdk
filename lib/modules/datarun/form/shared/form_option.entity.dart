@@ -6,7 +6,7 @@ import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 class FormOption with EquatableMixin {
   final String? code;
   final String name;
-  final String listName;
+  // final String listName;
   final IMap<String, String> label;
   final int order;
   final String? filterExpression;
@@ -16,7 +16,7 @@ class FormOption with EquatableMixin {
     required this.code,
     required this.name,
     required this.label,
-    required this.listName,
+    // required this.listName,
     required this.order,
     this.filterExpression,
     this.properties,
@@ -37,7 +37,7 @@ class FormOption with EquatableMixin {
       label: label.lock,
       code: json['code'],
       name: json['name'],
-      listName: json['listName'],
+      // listName: json['listName'],
       filterExpression: json['filterExpression'],
       properties: properties.lock,
       order: json['order'] ?? 0,
@@ -49,7 +49,7 @@ class FormOption with EquatableMixin {
       'code': code,
       'name': name,
       'label': label.unlockView,
-      'listName': listName,
+      // 'listName': listName,
       'filterExpression': filterExpression,
       'properties': properties?.unlockView,
       'order': order,
@@ -77,7 +77,7 @@ class FormOption with EquatableMixin {
       'code': code,
       'name': name,
       'label': label.unlock,
-      'listName': listName,
+      // 'listName': listName,
       ...?properties?.unlockView,
       'filterExpression': evalFilterExpression,
       'filterExpressionDependencies': filterExpressionDependencies,
@@ -86,5 +86,5 @@ class FormOption with EquatableMixin {
   }
 
   @override
-  List<Object?> get props => [code, name, listName, order, filterExpression];
+  List<Object?> get props => [code, name, order, filterExpression];
 }

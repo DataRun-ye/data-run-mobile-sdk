@@ -178,7 +178,8 @@ class DataFormSubmission extends SyncableEntity {
       formData: parseFormData(json['formData']),
 
       /// Syncable
-      formVersion: '${json['form']}_${json['version']}',
+      // formVersion: '${json['form']}_${json['version']}',
+      formVersion: json['formVersion'],
       form: json['form'],
       version: json['version'],
       deleted: json['deleted'] ?? false,
