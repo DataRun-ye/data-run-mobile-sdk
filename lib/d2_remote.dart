@@ -112,6 +112,7 @@ class D2Remote {
 
       userResponse = await HttpClient.get('me',
               baseUrl: url,
+              apiPath: '/api/custom/',
               username: username,
               password: password,
               dioTestClient: dioTestClient)

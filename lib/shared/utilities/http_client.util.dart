@@ -20,7 +20,7 @@ class HttpResponse {
 
 class HttpClient {
   // Data Run
-  static final String apiPath = '/api/v1/';
+  static const String apiPath = '/api/v1/';
 
   findById() {}
 
@@ -40,6 +40,7 @@ class HttpClient {
 
   static Future<HttpResponse> post(String resourceUrl, dynamic data,
       {String? baseUrl,
+      String apiPath = HttpClient.apiPath,
       String? username,
       String? password,
       Database? database,
@@ -81,6 +82,7 @@ class HttpClient {
 
   static Future<HttpResponse> put(String resourceUrl, dynamic data,
       {String? baseUrl,
+        String apiPath = HttpClient.apiPath,
       String? username,
       String? password,
       Database? database,
@@ -124,6 +126,7 @@ class HttpClient {
 
   static Future<HttpResponse> get(String resourceUrl,
       {String? baseUrl,
+        String apiPath = HttpClient.apiPath,
       String? username,
       String? password,
       Database? database,
