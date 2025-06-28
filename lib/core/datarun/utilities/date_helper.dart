@@ -39,19 +39,23 @@ class DateHelper {
 
   /// from DbUtc To Ui Local Format
   static String fromDbUtcToUiLocalFormat(String date,
-      {bool includeTime = false}) {
+      {bool includeTime = false, bool onlyTime = false}) {
     final DateTime? parsed =
         DateTime.tryParse(date.endsWith('Z') ? date : '${date}Z');
     return parsed != null
-        ? DateHelper.formatForUi(parsed, includeTime: includeTime)
+        ? DateHelper.formatForUi(parsed,
+            includeTime: includeTime, onlyTime: onlyTime)
         : date;
   }
 
   static String formatForUi(DateTime dateTime,
       {bool includeTime = false, bool onlyTime = false}) {
     final DateTime localDate = dateTime.toLocal();
-    final DateFormat formatter =
-        includeTime ? uiDateFormatNoSeconds() : uiDateFormat();
+    final DateFormat formatter = includeTime
+        ? onlyTime
+            ? timeFormat()
+            : uiDateFormatNoSeconds()
+        : uiDateFormat();
     return formatter.format(localDate);
   }
 

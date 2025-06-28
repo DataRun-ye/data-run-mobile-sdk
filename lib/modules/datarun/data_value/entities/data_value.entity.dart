@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:d2_remote/core/annotations/index.dart' as legacy;
 import 'package:d2_remote/modules/datarun/data_value/entities/data_form_submission.entity.dart';
 import 'package:d2_remote/modules/datarun/data_value/entities/repeat_instance.entity.dart';
@@ -10,39 +11,41 @@ import 'package:d2_remote/shared/entities/identifiable.entity.dart';
 class DataValue extends IdentifiableEntity {
   /// path of the Repeat in the FormTemplate
   @legacy.Column(nullable: false, type: legacy.ColumnType.TEXT)
-  String templatePath;
+  final String templatePath;
 
   /// the nearest repeat parent Instance in ancestry, or null
   @legacy.ManyToOne(table: RepeatInstance, joinColumnName: 'parent')
-  dynamic parent;
+  final dynamic parent;
 
   /// the root submission
   @legacy.ManyToOne(table: DataFormSubmission, joinColumnName: 'submission')
-  dynamic submission;
+  final dynamic submission;
 
   @legacy.Column(nullable: false, type: legacy.ColumnType.TEXT)
-  String dataElement;
+  final String dataElement;
+
+  @legacy.Column(nullable: false, type: legacy.ColumnType.BOOLEAN)
+  final bool deleted;
 
   @legacy.Column(nullable: true, type: legacy.ColumnType.TEXT)
-  dynamic value;
+  final dynamic value;
+
+  // @legacy.Column(nullable: true)
+  // bool? synced;
 
   DataValue(
-      {String? id,
+      {super.id,
       // String? uid,
-      String? createdDate,
-      String? lastModifiedDate,
+      super.createdDate,
+      super.lastModifiedDate,
       required this.parent,
       required this.submission,
       required this.templatePath,
       required this.dataElement,
+      bool? deleted,
       this.value,
-      required dirty})
-      : super(
-            id: id,
-            // uid: uid,
-            createdDate: createdDate,
-            lastModifiedDate: lastModifiedDate,
-            dirty: dirty);
+      required super.dirty})
+      : this.deleted = deleted == true;
 
   factory DataValue.fromJson(Map<String, dynamic> json) {
     late final value;
@@ -58,6 +61,7 @@ class DataValue extends IdentifiableEntity {
         lastModifiedDate: json['lastModifiedDate'],
         value: value,
         templatePath: json['templatePath'],
+        deleted: json['deleted'],
         dataElement: json['dataElement'],
         parent: json['parent'],
         submission: json['submission'],
@@ -87,11 +91,24 @@ class DataValue extends IdentifiableEntity {
       'templatePath': this.templatePath,
       'submission': this.submission,
       'parent': this.parent,
+      'deleted': this.deleted,
       'dataElement': this.dataElement,
       'value': this.value,
       'createdDate': this.createdDate,
       'lastModifiedDate': this.lastModifiedDate,
       'dirty': this.dirty
+    };
+  }
+
+  DataValue delete() {
+    return DataValue.fromJson(
+        {...this.toJson(), 'deleted': true, 'dirty': true});
+  }
+
+  static toUpload(DataValue eventDataValue) {
+    return {
+      "dataElement": eventDataValue.dataElement,
+      "value": eventDataValue.value
     };
   }
 }

@@ -1,16 +1,15 @@
-import 'dart:convert';
-
 import 'package:d2_remote/core/annotations/index.dart' as legacy;
-import 'package:d2_remote/modules/datarun/form/shared/form_option.entity.dart';
-import 'package:d2_remote/modules/datarun_shared/utilities/parsing_helpers.dart';
+import 'package:d2_remote/modules/metadatarun/option_set/entities/option.entity.dart';
 import 'package:d2_remote/shared/entities/identifiable.entity.dart';
-import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 
 @legacy.AnnotationReflectable
 @legacy.Entity(tableName: 'optionSet', apiResourceName: 'optionSets')
 class OptionSet extends IdentifiableEntity {
-  @legacy.Column(nullable: true, type: legacy.ColumnType.TEXT)
-  final IList<FormOption> options;
+  // @legacy.Column(nullable: true, type: legacy.ColumnType.TEXT)
+  // final IList<FormOption> options;
+
+  @legacy.OneToMany(table: Option)
+  List<Option>? options;
 
   OptionSet(
       {String? id,
@@ -19,10 +18,9 @@ class OptionSet extends IdentifiableEntity {
       String? code,
       String? createdDate,
       String? lastModifiedDate,
-      Iterable<FormOption>? options,
+      this.options,
       required dirty})
-      : this.options = IList.orNull(options) ?? const IList<FormOption>.empty(),
-        super(
+      : super(
             id: id,
             // uid: uid,
             name: name,
@@ -30,20 +28,25 @@ class OptionSet extends IdentifiableEntity {
             dirty: dirty);
 
   factory OptionSet.fromJson(Map<String, dynamic> json) {
-    final options = json['options'] != null
-        ? (parseDynamicJson(json['options']) as List)
-            .map((option) => FormOption.fromJson(option))
-            .toList()
-        : <FormOption>[];
+    // final options = json['options'] != null
+    //     ? (parseDynamicJson(json['options']) as List)
+    //         .map((option) => FormOption.fromJson(option))
+    //         .toList()
+    //     : <FormOption>[];
 
+    final String id = json['uid'] ?? json['id'].toString();
     return OptionSet(
-        id: json['uid'] ?? json['id'].toString(),
+        id: id,
         // uid: json['uid'],
         code: json['code'],
         name: json['name'],
         createdDate: json['createdDate'],
         lastModifiedDate: json['lastModifiedDate'],
-        options: options,
+        // options: options,
+        options: List<dynamic>.from(json['options'] ?? [])
+            .map((option) =>
+                Option.fromJson({...option, 'optionSet': id, 'dirty': false}))
+            .toList(),
         dirty: json['dirty']);
   }
 
@@ -55,7 +58,8 @@ class OptionSet extends IdentifiableEntity {
       'name': this.name,
       'createdDate': this.createdDate,
       'lastModifiedDate': this.lastModifiedDate,
-      'options': jsonEncode(options.unlockView),
+      'options': this.options,
+      // 'options': jsonEncode(options.unlockView),
       'dirty': this.dirty
     };
   }
