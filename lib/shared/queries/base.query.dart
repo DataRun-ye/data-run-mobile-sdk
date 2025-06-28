@@ -174,8 +174,8 @@ class BaseQuery<T extends BaseEntity> {
     return this;
   }
 
-  orderBy({required String attribute, required SortOrder order}) {
-    this.sortOrder[attribute] = order;
+  orderBy({required String attribute, required SortOrder sortOrder}) {
+    this.sortOrder[attribute] = sortOrder;
     return this;
   }
 

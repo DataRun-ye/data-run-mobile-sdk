@@ -85,6 +85,7 @@ class DataElement extends IdentifiableEntity {
         ? Map<String, String?>.from(
             json['label'] is String ? jsonDecode(json['label']) : json['label'])
         : <String, String?>{"en": json['name']};
+    final optionSet = json['optionSet'];
 
     return DataElement(
         id: json['uid'] ?? json['id'].toString(),
@@ -99,7 +100,11 @@ class DataElement extends IdentifiableEntity {
         allowedActions: allowedActions,
         mandatory: json['mandatory'] ?? false,
         gs1Enabled: json['gs1Enabled'] ?? false,
-        optionSet: json['optionSet']?['uid'],
+        optionSet: optionSet != null
+            ? optionSet is String
+                ? optionSet
+                : optionSet['uid']
+            : null,
         resourceType: resourceType,
         resourceMetadataSchema: json['resourceMetadataSchema'],
         defaultValue: json['defaultValue'] != null

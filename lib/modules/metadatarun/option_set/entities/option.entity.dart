@@ -2,14 +2,15 @@ import 'dart:convert';
 
 import 'package:d2_remote/core/annotations/column.annotation.dart';
 import 'package:d2_remote/core/annotations/index.dart' as legacy;
+import 'package:d2_remote/modules/datarun_shared/utilities/parsing_helpers.dart';
 import 'package:d2_remote/modules/metadatarun/option_set/entities/option_set.entity.dart';
 import 'package:d2_remote/shared/entities/identifiable.entity.dart';
 
 @legacy.AnnotationReflectable
 @legacy.Entity(tableName: 'option', apiResourceName: 'options')
 class Option extends IdentifiableEntity {
-  @legacy.Column(nullable: true, type: ColumnType.INTEGER)
-  final int? sortOrder;
+  @legacy.Column(nullable: false, type: ColumnType.INTEGER)
+  final int sortOrder;
 
   @legacy.Column(type: ColumnType.TEXT, nullable: true)
   final String? description;
@@ -32,65 +33,75 @@ class Option extends IdentifiableEntity {
       String? code,
       String? displayName,
       Map<String, String> label = const {},
-      // required this.listName,
       required this.sortOrder,
       required this.optionSet,
       this.description,
       this.filterExpression,
       this.properties,
+      String? createdDate,
+      String? lastModifiedDate,
       required bool dirty})
       : super(
             id: id,
             name: name,
             code: code,
             displayName: displayName,
+            createdDate: createdDate,
+            lastModifiedDate: lastModifiedDate,
             dirty: dirty) {
-    label.addAll(label);
+    this.label.addAll(label);
   }
 
   factory Option.fromJson(Map<String, dynamic> jsonData) {
-    final label = jsonData['label'] != null
-        ? Map<String, String>.from(jsonData['label'] is String
-            ? jsonDecode(jsonData['label'])
-            : jsonData['label'])
-        : <String, String>{"ar": jsonData['name'], "en": jsonData['name']};
-
     final properties = jsonData['properties'] != null
-        ? Map<String, dynamic>.from(jsonData['properties'] is String
-            ? jsonDecode(jsonData['properties'])
-            : jsonData['properties'])
-        : <String, dynamic>{};
-
+        ? Map<String, dynamic>.from(parseDynamicJson(jsonData['properties']))
+        : null;
+    final label = jsonData['label'] != null
+        ? Map<String, String>.from(parseDynamicJson(jsonData['label']))
+        : <String, String>{"ar": jsonData['name']};
+    // final List<Option> options = json['options'] is List<Option>
+    //     ? json['options']
+    //     : (json['options'] ?? []).map<Option>((item) {
+    //         final option = item is Option ? item.toJson() : item;
+    //         return Option.fromJson({
+    //           ...option,
+    //           'id': option['id'] ?? '${id}_${option['name']}',
+    //           'optionSet': option['optionSet'] ?? id,
+    //           'dirty': option['dirty'] ?? false,
+    //         });
+    //       }).toList();
     return Option(
-        id: '${jsonData['optionSet']}_${jsonData['name']}',
+        // id: '${jsonData['optionSet']}_${jsonData['name']}',
+        id: jsonData['id'],
         name: jsonData['name'],
         code: jsonData['code'],
         optionSet: jsonData['optionSet'],
         displayName: jsonData['displayName'],
         description: jsonData['description'],
-        label: jsonData['label'] != null
-            ? Map<String, String>.from(jsonData['label'] is String
-            ? jsonDecode(jsonData['label'])
-            : jsonData['label'])
-            : {"en": jsonData['name']},
-        sortOrder: jsonData['order'] ?? 0,
+        sortOrder: jsonData['sortOrder'] ?? jsonData['order'] ?? 0,
         filterExpression: jsonData['filterExpression'],
+        label: label,
         properties: properties,
-        dirty: jsonData['dirty']);
+        createdDate: jsonData['createdDate'],
+        lastModifiedDate: jsonData['lastModifiedDate'],
+        dirty: jsonData['dirty'] ?? false);
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'uid': id,
       'code': code,
       'name': name,
       'optionSet': optionSet,
-      'order': sortOrder,
+      'sortOrder': sortOrder,
       'displayName': displayName,
       'description': description,
-      'label': label,
+      'label': jsonEncode(label),
       'filterExpression': filterExpression,
-      'properties': properties,
+      'properties': properties != null ? jsonEncode(properties) : null,
+      'createdDate': this.createdDate,
+      'lastModifiedDate': this.lastModifiedDate,
       'dirty': dirty,
     };
   }
