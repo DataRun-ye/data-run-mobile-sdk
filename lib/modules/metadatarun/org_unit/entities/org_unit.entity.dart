@@ -95,7 +95,7 @@ class OrgUnit extends IdentifiableTreeNode {
             ? Map<String, String>.from(json['label'] is String
                 ? jsonDecode(json['label'])
                 : json['label'])
-            : {"en": json['name']},
+            : {"en": json['name'], "ar": json['name']},
         // geometry: geometry,
         geometry: json['geometry']?.toString() ?? null,
         createdDate: json['createdDate'],

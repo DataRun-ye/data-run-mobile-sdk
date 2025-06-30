@@ -14,7 +14,7 @@ class RuleAction
         ExpressionProvider,
         EvaluationEngine<bool> {
   final String expression;
-  final ActionType action;
+  final RuleActionType action;
   final IMap<String, String> message;
   final dynamic assignedValue;
 
@@ -37,7 +37,7 @@ class RuleAction
 
     return RuleAction(
         expression: json['expression'],
-        action: ActionType.getAction(json['action']),
+        action: RuleActionType.getAction(json['action']),
         assignedValue: json['assignedValue'],
         message: IMap(message));
   }
@@ -54,7 +54,7 @@ class RuleAction
 
   RuleAction copyWith({
     String? expression,
-    ActionType? action,
+    RuleActionType? action,
     IMap<String, String>? message,
     dynamic assignedValue,
   }) {

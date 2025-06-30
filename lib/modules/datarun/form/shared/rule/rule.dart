@@ -10,7 +10,7 @@ class Rule with EquatableMixin {
 
   final String expression;
 
-  final ActionType? action;
+  final RuleActionType? action;
   final RuleAction ruleAction;
   final IMap<String, String>? message;
   final FilterInfo? filterInfo;
@@ -44,7 +44,7 @@ class Rule with EquatableMixin {
         : <String, String>{};
     return Rule(
         field: json['field'],
-        action: ActionType.getAction(json['action']),
+        action: RuleActionType.getAction(json['action']),
         ruleAction: RuleAction.fromJson({
           'action': json['action'],
           'expression': json['expression'],

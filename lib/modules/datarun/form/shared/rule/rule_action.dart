@@ -1,15 +1,24 @@
-enum ActionType {
+enum RuleActionType {
   // Expression must be logical (true, false)
-  Visibility,
+  // Visibility,
   Show, // deprecated, use Visibility
   Hide, // deprecated, use Visibility
+  HideSection, // deprecated, use Visibility
   Error, // deprecated, use Constraint
+  ErrorOnComplete, // deprecated, use Constraint
   Warning, // deprecated, use Constraint
+  WarningOnComplete, // deprecated, use Constraint
   Filter, // deprecated, use choice Filter
   // Expression must be logical (true, false)
   StopRepeat,
   // Expression must be logical (true, false)
   Mandatory,
+  DisplayText,
+  DisplayKeyValuePair,
+
+  HideOption,
+  HideOptionGroup,
+  ShowOptionGroup,
   // Expression result must be numerical >= 0
   Count,
   // Expression result must be a compatible Value with the Field type
@@ -17,35 +26,33 @@ enum ActionType {
   Assign,
   Unknown;
 
-  static List<ActionType> get VISIBILITY_ACTIONS =>
-      <ActionType>[Visibility, Show, Hide];
+  static List<RuleActionType> get VISIBILITY_ACTIONS =>
+      <RuleActionType>[Show, Hide];
 
   bool get isVisibility => VISIBILITY_ACTIONS.contains(this);
 
-  static ActionType getAction(String? action) {
+  static RuleActionType getAction(String? action) {
     switch (action?.toLowerCase()) {
-      case 'visibility':
-        return ActionType.Visibility;
       case 'show':
-        return ActionType.Show;
+        return RuleActionType.Show;
       case 'hide':
-        return ActionType.Hide;
+        return RuleActionType.Hide;
       case 'error':
-        return ActionType.Error;
+        return RuleActionType.Error;
       case 'warning':
-        return ActionType.Warning;
+        return RuleActionType.Warning;
       case 'filter':
-        return ActionType.Filter;
+        return RuleActionType.Filter;
       case 'stopRepeat':
-        return ActionType.StopRepeat;
+        return RuleActionType.StopRepeat;
       case 'mandatory':
-        return ActionType.Mandatory;
+        return RuleActionType.Mandatory;
       case 'count':
-        return ActionType.Count;
+        return RuleActionType.Count;
       case 'assign':
-        return ActionType.Assign;
+        return RuleActionType.Assign;
       default:
-        return ActionType.Unknown;
+        return RuleActionType.Unknown;
       // throw ArgumentError('Invalid value type: $valueType');
     }
   }

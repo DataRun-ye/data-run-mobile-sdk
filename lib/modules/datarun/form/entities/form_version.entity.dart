@@ -152,7 +152,7 @@ class FormVersion extends IdentifiableEntity
           ? Map<String, String>.from(json['label'] is String
               ? jsonDecode(json['label'])
               : json['label'])
-          : {"en": json['name']},
+          : {"en": json['name'], "ar": json['name']},
       defaultLocal: json['defaultLocal'] ?? 'en',
       treeFields: treeFields,
       fields: fields,
@@ -215,7 +215,7 @@ class FormVersion extends IdentifiableEntity
           ? Map<String, String>.from(json['label'] is String
               ? jsonDecode(json['label'])
               : json['label'])
-          : {"en": json['name']},
+          : {"en": json['name'], "ar": json['name']},
       defaultLocal: json['defaultLocal'] ?? 'en',
       treeFields: tree,
       fields: fields,

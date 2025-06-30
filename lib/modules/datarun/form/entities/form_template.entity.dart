@@ -61,7 +61,7 @@ class FormTemplate extends IdentifiableEntity {
           ? Map<String, String>.from(json['label'] is String
               ? jsonDecode(json['label'])
               : json['label'])
-          : {"en": json['name']},
+          : {"en": json['name'], "ar": json['name']},
       // team: team,
       versionNumber: json['versionNumber'],
       versionUid: json['versionUid'],
@@ -106,7 +106,7 @@ class FormTemplate extends IdentifiableEntity {
           ? Map<String, String>.from(json['label'] is String
               ? jsonDecode(json['label'])
               : json['label'])
-          : {"en": json['name']},
+          : {"en": json['name'], "ar": json['name']},
       versionNumber: json['versionNumber'],
       versionUid: json['versionUid'],
       createdDate: json['createdDate'],

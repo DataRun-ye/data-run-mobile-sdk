@@ -100,7 +100,7 @@ class MetadataSchema extends IdentifiableEntity {
           ? Map<String, String>.from(json['label'] is String
               ? jsonDecode(json['label'])
               : json['label'])
-          : {"en": json['name']},
+          : {"en": json['name'], "ar": json['name']},
       defaultLocal: json['defaultLocal'] ?? 'en',
       fields: fields,
       flattenedFields: flattenedFields,
@@ -149,7 +149,7 @@ class MetadataSchema extends IdentifiableEntity {
           ? Map<String, String>.from(json['label'] is String
               ? jsonDecode(json['label'])
               : json['label'])
-          : {"en": json['name']},
+          : {"en": json['name'], "ar": json['name']},
       defaultLocal: json['defaultLocal'] ?? 'en',
       fields: fields,
       flattenedFields: flattenedFields,
