@@ -32,7 +32,7 @@ class OptionSet extends IdentifiableEntity {
             final option = item is Option ? item.toJson() : item;
             return Option.fromJson({
               ...option,
-              'id': option['id'] ?? '${id}_${option['name']}',
+              'id': option['id'],
               'optionSet': option['optionSet'] ?? id,
               'properties': option['properties'],
               'dirty': option['dirty'] ?? false,
@@ -56,24 +56,26 @@ class OptionSet extends IdentifiableEntity {
         name: json['name'],
         createdDate: json['createdDate'],
         lastModifiedDate: json['lastModifiedDate'],
-        options: json['options']
-                ?.map<Option>((opJson) => Option(
-                      id: '${id}_${opJson['name']}',
-                      code: opJson['code'],
-                      name: opJson['name'],
-                      displayName: opJson['displayName'],
-                      description: opJson['description'],
-                      optionSet: id,
-                      label: Map<String, String>.from(opJson['label']!),
-                      filterExpression: opJson['filterExpression'],
-                      properties: opJson['properties'],
-                      sortOrder: opJson['order'],
-                      createdDate: opJson['createdDate'],
-                      lastModifiedDate: opJson['lastModifiedDate'],
-                      dirty: json['dirty'] ?? false,
-                    ))
-                .toList() ??
-            [],
+        options: json['options'] != null
+            ? (json['options'] as List).asMap().entries.map<Option>((entry) {
+                final opJson = entry.value;
+                return Option(
+                  id: opJson['id'],
+                  code: opJson['code'],
+                  name: opJson['name'],
+                  displayName: opJson['displayName'],
+                  description: opJson['description'],
+                  optionSet: id,
+                  label: Map<String, String>.from(opJson['label']!),
+                  filterExpression: opJson['filterExpression'],
+                  properties: opJson['properties'],
+                  sortOrder: entry.key + 1,
+                  createdDate: opJson['createdDate'],
+                  lastModifiedDate: opJson['lastModifiedDate'],
+                  dirty: json['dirty'] ?? false,
+                );
+              }).toList()
+            : [],
         dirty: json['dirty'] ?? false);
   }
 

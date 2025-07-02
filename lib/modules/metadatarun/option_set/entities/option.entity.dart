@@ -59,19 +59,7 @@ class Option extends IdentifiableEntity {
     final label = jsonData['label'] != null
         ? Map<String, String>.from(parseDynamicJson(jsonData['label']))
         : <String, String>{"ar": jsonData['name']};
-    // final List<Option> options = json['options'] is List<Option>
-    //     ? json['options']
-    //     : (json['options'] ?? []).map<Option>((item) {
-    //         final option = item is Option ? item.toJson() : item;
-    //         return Option.fromJson({
-    //           ...option,
-    //           'id': option['id'] ?? '${id}_${option['name']}',
-    //           'optionSet': option['optionSet'] ?? id,
-    //           'dirty': option['dirty'] ?? false,
-    //         });
-    //       }).toList();
     return Option(
-        // id: '${jsonData['optionSet']}_${jsonData['name']}',
         id: jsonData['id'],
         name: jsonData['name'],
         code: jsonData['code'],
