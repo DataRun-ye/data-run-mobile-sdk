@@ -5,10 +5,13 @@ import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 
 class TeamFormPermission with EquatableMixin {
   final String form;
+  final bool downloaded;
   final IList<FormPermission> permissions;
 
   TeamFormPermission(
-      {required this.form, Iterable<FormPermission>? permissions})
+      {required this.form,
+      Iterable<FormPermission>? permissions,
+      this.downloaded = false})
       : this.permissions = IList.orNull(permissions) ?? IList([]);
 
   bool hasPermission(FormPermission action) {
@@ -28,13 +31,27 @@ class TeamFormPermission with EquatableMixin {
     );
   }
 
+
   Map<String, dynamic> toJson() {
     return {
       'form': form,
+      'downloaded': downloaded,
       'permissions': permissions.map((permission) => permission.name).toList(),
     };
   }
 
   @override
-  List<Object?> get props => [form, permissions];
+  List<Object?> get props => [form, permissions, downloaded];
+
+  TeamFormPermission copyWith({
+    String? form,
+    bool? downloaded,
+    Iterable<FormPermission>? permissions,
+  }) {
+    return TeamFormPermission(
+      form: form ?? this.form,
+      downloaded: downloaded ?? this.downloaded,
+      permissions: permissions ?? this.permissions,
+    );
+  }
 }
