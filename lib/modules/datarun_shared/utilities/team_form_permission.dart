@@ -4,14 +4,14 @@ import 'package:equatable/equatable.dart';
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 
 class TeamFormPermission with EquatableMixin {
+  final String team;
   final String form;
-  final bool downloaded;
   final IList<FormPermission> permissions;
 
   TeamFormPermission(
-      {required this.form,
-      Iterable<FormPermission>? permissions,
-      this.downloaded = false})
+      {required this.team,
+      required this.form,
+      Iterable<FormPermission>? permissions})
       : this.permissions = IList.orNull(permissions) ?? IList([]);
 
   bool hasPermission(FormPermission action) {
@@ -26,32 +26,20 @@ class TeamFormPermission with EquatableMixin {
         : <FormPermission>[];
 
     return TeamFormPermission(
+      team: json['team'],
       form: json['form'],
       permissions: permissions,
     );
   }
 
-
   Map<String, dynamic> toJson() {
     return {
+      'team': team,
       'form': form,
-      'downloaded': downloaded,
       'permissions': permissions.map((permission) => permission.name).toList(),
     };
   }
 
   @override
-  List<Object?> get props => [form, permissions, downloaded];
-
-  TeamFormPermission copyWith({
-    String? form,
-    bool? downloaded,
-    Iterable<FormPermission>? permissions,
-  }) {
-    return TeamFormPermission(
-      form: form ?? this.form,
-      downloaded: downloaded ?? this.downloaded,
-      permissions: permissions ?? this.permissions,
-    );
-  }
+  List<Object?> get props => [team, form, permissions];
 }

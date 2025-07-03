@@ -61,20 +61,17 @@ class Team extends IdentifiableEntity {
   }
 
   factory Team.fromJson(Map<String, dynamic> json) {
-    // final activity =
-    //     json['activity'] is String ? json['activity'] : json['activity']['uid'];
-
     final scope = EntityScope.getType(json['scope']);
-
+    final id = json['uid'] ?? json['id'].toString();
     final formPermissions = json['formPermissions'] != null
         ? (parseDynamicJson(json['formPermissions']) as List)
-            .map((permissions) => TeamFormPermission.fromJson(permissions))
+            .map((permissions) =>
+                TeamFormPermission.fromJson({...permissions, 'team': id}))
             .toList()
         : <TeamFormPermission>[];
 
     return Team(
-        id: json['uid'] ?? json['id'].toString(),
-        // uid: json['uid'],
+        id: id,
         name: json['name'],
         shortName: json['shortName'],
         code: json['code'],
@@ -100,6 +97,8 @@ class Team extends IdentifiableEntity {
   }
 
   factory Team.fromApi(Map<String, dynamic> jsonData) {
+    final id = jsonData['uid'] ?? jsonData['id'].toString();
+
     final activity = jsonData['activity'] is String?
         ? jsonData['activity']
         : jsonData['activity']['uid'];
@@ -108,13 +107,13 @@ class Team extends IdentifiableEntity {
 
     final formPermissions = jsonData['formPermissions'] != null
         ? (parseDynamicJson(jsonData['formPermissions']) as List)
-            .map((permissions) => TeamFormPermission.fromJson(permissions))
+            .map((permissions) =>
+                TeamFormPermission.fromJson({...permissions, 'team': id}))
             .toList()
         : <TeamFormPermission>[];
 
     return Team(
-        id: jsonData['uid'],
-        // uid: jsonData['uid'],
+        id: id,
         name: jsonData['name'],
         shortName: jsonData['shortName'],
         code: jsonData['code'],
@@ -127,19 +126,8 @@ class Team extends IdentifiableEntity {
                 ? jsonDecode(jsonData['properties'])
                 : jsonData['properties'])
             : {},
-        // teamType: jsonData['teamType'],
         createdDate: jsonData['createdDate'],
         lastModifiedDate: jsonData['lastModifiedDate'],
-        // managedTeams: jsonData['managedTeams']
-        //         ?.map<ManagedTeam>((team) => ManagedTeam(
-        //             id: team['uid'],
-        //             name: team['name'],
-        //             code: team['code'],
-        //             managedTeam: team['uid'],
-        //             team: jsonData['uid'],
-        //             dirty: jsonData['dirty'] ?? false))
-        //         .toList() ??
-        //     [],
         formPermissions: formPermissions,
         scope: scope,
         dirty: jsonData['dirty'] ?? false);
@@ -158,7 +146,6 @@ class Team extends IdentifiableEntity {
     data['deleteClientData'] = this.deleteClientData;
     data['createdDate'] = this.createdDate;
     data['lastModifiedDate'] = this.lastModifiedDate;
-    // data['managedTeams'] = this.managedTeams;
     data['properties'] = jsonEncode(this.properties);
     data['formPermissions'] = jsonEncode((this
         .formPermissions
