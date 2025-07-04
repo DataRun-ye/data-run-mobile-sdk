@@ -5,7 +5,6 @@ import 'dart:io';
 
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:sqflite_sqlcipher/sqflite.dart' as cipher;
 
 class DatabaseManager {
   final int version = 1;
@@ -15,7 +14,7 @@ class DatabaseManager {
   String phrase = 'e@ar3-0Fd!g34Ds-3rat3d#Str4r3&-Sdk1abl3';
 
   static final DatabaseManager _databaseInstance =
-      new DatabaseManager._internal();
+  new DatabaseManager._internal();
 
   static Database? _database;
   final _initDatabaseMemoizer = AsyncMemoizer<Database>();
@@ -98,14 +97,25 @@ class DatabaseManager {
     Directory documentDirectory = await getApplicationDocumentsDirectory();
     String path = join(documentDirectory.path, databaseName + '.db');
 
+    // var database = inMemory
+    //     ? await cipher.openDatabase(inMemoryDatabasePath,
+    //         onConfigure: _onConfigure, password: phrase)
+    //     : await cipher.openDatabase(path,
+    //         version: version,
+    //         onCreate: _createDatabase,
+    //         onConfigure: _onConfigure,
+    //         password: phrase);
     var database = inMemory
-        ? await cipher.openDatabase(inMemoryDatabasePath,
-            onConfigure: _onConfigure, password: phrase)
-        : await cipher.openDatabase(path,
-            version: version,
-            onCreate: _createDatabase,
-            onConfigure: _onConfigure,
-            password: phrase);
+        ? await openDatabase(
+      inMemoryDatabasePath,
+      onConfigure: _onConfigure, /*password: phrase*/
+    )
+        : await openDatabase(
+      path,
+      version: version,
+      onCreate: _createDatabase,
+      onConfigure: _onConfigure, /*password: phrase*/
+    );
     return database;
   }
 
