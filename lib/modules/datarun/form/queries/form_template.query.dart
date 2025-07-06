@@ -1,30 +1,32 @@
 import 'package:d2_remote/core/annotations/index.dart';
+import 'package:d2_remote/core/utilities/repository.dart';
 import 'package:d2_remote/modules/datarun/form/entities/form_template.entity.dart';
 import 'package:d2_remote/modules/datarun/form/entities/form_version.entity.dart';
-import 'package:d2_remote/modules/datarun/form/repository/form_template_repository.dart';
-import 'package:d2_remote/modules/datarun/form/repository/form_version_repository.dart';
 import 'package:d2_remote/shared/models/request_progress.model.dart';
 import 'package:d2_remote/shared/queries/base.query.dart';
 import 'package:d2_remote/shared/utilities/http_client.util.dart';
 import 'package:dio/dio.dart';
-import 'package:injectable/injectable.dart';
 import 'package:reflectable/reflectable.dart';
+import 'package:sqflite/sqflite.dart';
 
 @AnnotationReflectable
 @Query(type: QueryType.METADATA)
-@lazySingleton
 class FormTemplateQuery extends BaseQuery<FormTemplate> {
-  final FormTemplateRepository dataSource;
-  final FormVersionRepository formVersionRepository;
-
-  FormTemplateQuery(this.dataSource, this.formVersionRepository)
-      : super(dataSource);
+  FormTemplateQuery({Database? database}) : super(database: database);
   int? version;
 
+  // FormTemplateQuery byVersion(int? version) {
+  //   this.version = version;
+  //
+  //   return version != null
+  //       ? this.where(attribute: 'version', value: version)
+  //       : this;
+  // }
+
   FormTemplateQuery withFormVersions() {
-    final Column? relationColumn = formVersionRepository.columns.firstWhere(
-        (column) =>
-            column.relation?.referencedEntity?.tableName == this.tableName);
+    final formVersion = Repository<FormVersion>();
+    final Column? relationColumn = formVersion.columns.firstWhere((column) =>
+        column.relation?.referencedEntity?.tableName == this.tableName);
 
     if (relationColumn != null) {
       ColumnRelation relation = ColumnRelation(
@@ -66,10 +68,10 @@ class FormTemplateQuery extends BaseQuery<FormTemplate> {
     final dhisUrl = await this.dataRunUrl();
 
     final response = await HttpClient.get(dhisUrl,
-        database: await this.dataSource.database, dioTestClient: dioTestClient);
+        database: this.database, dioTestClient: dioTestClient);
 
     List data;
-    data = response.body[this.apiResourceName]?.toList();
+    data = response.body[this.apiResourceName]?.toList() ?? [];
 
     List<Map<String, dynamic>> forms = [];
 

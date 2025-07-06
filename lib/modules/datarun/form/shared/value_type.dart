@@ -49,67 +49,79 @@ enum ValueType {
 
   ValueTypeValidator<DException> get validator => _validator;
 
-  static List<ValueType> get INTEGER_TYPES => <ValueType>[
-        Integer,
-        IntegerPositive,
-        IntegerNegative,
-        IntegerZeroOrPositive
-      ];
+  static const List<ValueType> INTEGER_TYPES = <ValueType>[
+    Integer,
+    IntegerPositive,
+    IntegerNegative,
+    IntegerZeroOrPositive
+  ];
 
-  static List<ValueType> get NUMERIC_TYPES => <ValueType>[
-        Integer,
-        Number,
-        IntegerPositive,
-        IntegerNegative,
-        IntegerZeroOrPositive,
-        UnitInterval,
-        Percentage
-      ];
+  static const List<ValueType> NUMERIC_TYPES = <ValueType>[
+    Integer,
+    Number,
+    IntegerPositive,
+    IntegerNegative,
+    IntegerZeroOrPositive,
+    UnitInterval,
+    Percentage
+  ];
 
-  static List<ValueType> get BASIC_TYPES => <ValueType>[
-        Text,
-        LongText,
-        Letter,
-        Time,
-        Integer,
-        Number,
-        IntegerPositive,
-        IntegerNegative,
-        IntegerZeroOrPositive,
-        UnitInterval,
-        Percentage
-      ];
+  static const List<ValueType> DECIMAL_TYPES = <ValueType>[
+    ValueType.Number,
+    ValueType.UnitInterval,
+    ValueType.Percentage
+  ];
 
-  static List<ValueType> get SECTION_TYPES =>
-      <ValueType>[Section, RepeatableSection];
+  static const List<ValueType> BASIC_TYPES = <ValueType>[
+    Text,
+    LongText,
+    Letter,
+    Time,
+    Integer,
+    Number,
+    IntegerPositive,
+    IntegerNegative,
+    IntegerZeroOrPositive,
+    UnitInterval,
+    Percentage
+  ];
 
-  static List<ValueType> get WITH_OPTIONS_TYPES =>
-      <ValueType>[SelectOne, SelectMulti];
+  static const List<ValueType> SECTION_TYPES = <ValueType>[
+    Section,
+    RepeatableSection
+  ];
 
-  static List<ValueType> get BOOLEAN_TYPES => <ValueType>[Boolean, TrueOnly];
+  static const List<ValueType> WITH_OPTIONS_TYPES = <ValueType>[
+    SelectOne,
+    SelectMulti
+  ];
 
-  static List<ValueType> get TEXT_TYPES => <ValueType>[
-        Text,
-        LongText,
-        Letter,
-        Coordinate,
-        FullName,
-        Integer,
-        Number,
-        IntegerPositive,
-        IntegerNegative,
-        IntegerZeroOrPositive,
-        UnitInterval,
-        Percentage
-      ];
+  static const List<ValueType> BOOLEAN_TYPES = <ValueType>[Boolean, TrueOnly];
 
-  static List<ValueType> get DATE_TYPES => <ValueType>[Date, DateTime];
+  static const List<ValueType> TEXT_TYPES = <ValueType>[
+    Text,
+    LongText,
+    Letter,
+    Coordinate,
+    FullName,
+    Integer,
+    Number,
+    IntegerPositive,
+    IntegerNegative,
+    IntegerZeroOrPositive,
+    UnitInterval,
+    Percentage
+  ];
 
-  static List<ValueType> get FILE_TYPES => <ValueType>[Image, FileResource];
+  static const List<ValueType> DATE_TYPES = <ValueType>[Date, DateTime, Time];
+
+  static const List<ValueType> FILE_TYPES = <ValueType>[Image, FileResource];
 
   bool get isBasicType => BASIC_TYPES.contains(this);
 
   bool get isInteger => INTEGER_TYPES.contains(this);
+
+  bool get isDecimal => DECIMAL_TYPES.contains(this);
 
   bool get isSectionType => SECTION_TYPES.contains(this);
 
@@ -141,12 +153,12 @@ enum ValueType {
 
   static ValueType getValueType(String? valueType) {
     switch (valueType?.toLowerCase()) {
-      case 'section':
-        return ValueType.Section;
+      // case 'section':
+      //   return ValueType.Section;
+      // case 'repeatablesection':
+      //   return ValueType.RepeatableSection;
       case 'scannedcode':
         return ValueType.ScannedCode;
-      case 'repeatablesection':
-        return ValueType.RepeatableSection;
       case 'text':
         return ValueType.Text;
       case 'longtext':

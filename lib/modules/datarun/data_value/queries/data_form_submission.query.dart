@@ -1,31 +1,25 @@
-import 'package:d2_remote/core/annotations/nmc/query.annotation.dart';
 import 'package:d2_remote/core/annotations/reflectable.annotation.dart';
 import 'package:d2_remote/core/datarun/utilities/date_helper.dart';
 import 'package:d2_remote/modules/datarun/data_value/entities/data_form_submission.entity.dart';
-import 'package:d2_remote/modules/datarun/data_value/repository/submission_repository.dart';
 import 'package:d2_remote/modules/datarun_shared/queries/syncable.query.dart';
 import 'package:d2_remote/shared/models/request_progress.model.dart';
 import 'package:d2_remote/shared/utilities/http_client.util.dart';
 import 'package:d2_remote/shared/utilities/save_option.util.dart';
 import 'package:dio/dio.dart';
-import 'package:injectable/injectable.dart';
+import 'package:sqflite/sqflite.dart';
 
 @AnnotationReflectable
-@Query(type: QueryType.METADATA)
-@LazySingleton(/*as: SyncableQuery<DataFormSubmission>*/)
-class DataFormSubmissionQuery extends SyncableQuery<DataFormSubmission> {
-  final SubmissionRepository dataSource;
-
-  DataFormSubmissionQuery(this.dataSource) : super(dataSource);
+// @Query(type: QueryType.METADATA)
+class FormSubmissionQuery extends SyncableQuery<DataFormSubmission> {
+  FormSubmissionQuery({Database? database}) : super(database: database);
 
   @override
   Future setDataAndSave(DataFormSubmission data) {
-    return this.setData(data).save();
+    return FormSubmissionQuery().setData(data).save();
   }
 
   @override
-  Future<int> delete() async {
-    int i = 0;
+  Future delete() async {
     if (this.id != null) {
       final toDelete = await getOne();
       if (toDelete!.synced ?? false) {
@@ -40,19 +34,10 @@ class DataFormSubmissionQuery extends SyncableQuery<DataFormSubmission> {
 
         await setData(deleted)
             .save(saveOptions: SaveOptions(skipLocalSyncStatus: true));
-        ++i;
-        return i;
       } else {
-        return super.delete();
-      }
-    } else {
-      final toDeleteList = await get();
-      for (var item in toDeleteList) {
-        await this.byId(item.id!).delete();
-        i++;
+        super.delete();
       }
     }
-    return i;
   }
 
   @override
@@ -70,7 +55,7 @@ class DataFormSubmissionQuery extends SyncableQuery<DataFormSubmission> {
     final dataRunUrl = '${query.resourceName}/objects?paged=false';
 
     final response = await HttpClient.get(dataRunUrl,
-        database: await this.dataSource.database, dioTestClient: dioTestClient);
+        database: this.database, dioTestClient: dioTestClient);
 
     List data = response.body?[this.apiResourceName].toList() ?? [];
 

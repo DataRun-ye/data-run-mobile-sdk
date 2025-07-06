@@ -1,12 +1,8 @@
 import 'package:d2_remote/modules/datarun/form/shared/field_template/field_template.entity.dart';
 import 'package:d2_remote/modules/datarun/form/shared/field_template/template.dart';
 import 'package:d2_remote/modules/datarun/form/shared/rule/action.dart';
-import 'package:d2_remote/modules/datarun/form/shared/template_extensions/form_traverse_extension.dart';
 
 extension FieldTemplateDependencies on Template {
-  List<String> get allDependencies =>
-      {...dependencies, ...filterDependencies}.toSet().toList();
-
   List<String> get dependencies {
     List<String> dependencySet = [];
     for (final rule in rules?.unlockView ?? []) {
@@ -40,7 +36,7 @@ extension FieldTemplateDependencies on Template {
     List<String> dependencyList = [];
     final fieldPattern = RegExp(r'#\{(.*?)\}');
 
-    if (isSelectType) {
+    if (type?.isSelectType == true) {
       if ((this as FieldTemplate).choiceFilter != null &&
           (this as FieldTemplate).choiceFilter!.isNotEmpty) {
         final filterDependencies = fieldPattern
@@ -60,7 +56,7 @@ extension FieldTemplateDependencies on Template {
     List<String> dependencyList = [];
     final fieldPattern = RegExp(r'#\{(.*?)\}');
 
-    if (isCalculate) {
+    if (type?.isCalculate == true) {
       if ((this as FieldTemplate).calculation != null &&
           (this as FieldTemplate).calculation!.isNotEmpty) {
         final calculationDependencies = fieldPattern
@@ -84,7 +80,7 @@ extension FieldTemplateDependencies on Template {
   }
 
   String? get evalChoiceFilterExpression {
-    if (this.isSelectType) {
+    if (this.type?.isSelectType == true) {
       return (this as FieldTemplate)
           .choiceFilter
           ?.replaceAll("#{", "")

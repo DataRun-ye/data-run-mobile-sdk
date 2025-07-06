@@ -1,5 +1,5 @@
 import 'package:d2_remote/core/annotations/index.dart';
-import 'package:d2_remote/shared/mixin/d_run_base.dart';
+import 'package:d2_remote/shared/entities/base.entity.dart';
 import 'package:d2_remote/shared/utilities/merge_mode.util.dart';
 import 'package:d2_remote/shared/utilities/query_filter.util.dart';
 import 'package:d2_remote/shared/utilities/sort_order.util.dart';
@@ -10,21 +10,21 @@ import 'package:sqflite/sqflite.dart';
 ///
 /// The class provides methods to create, read, update, and delete entities.
 /// It also includes utilities for handling relationships and sanitizing data.
-abstract class BaseDataStore<T extends DRunBase> {
-  // /// A list of columns representing the properties of the entity.
-  // List<Column> get columns;
-  //
-  // /// A list of columns that represent one-to-many relationships.
-  // List<Column> get oneToManyColumns;
-  //
-  // /// The entity definition for this repository.
-  // Entity get entity;
-  //
-  // /// The SQL query used to create the table for this entity.
-  // String get createQuery;
+abstract class BaseRepositoryD<T extends BaseEntity> {
+  /// A list of columns representing the properties of the entity.
+  List<Column> get columns;
 
-  // /// Gets the database instance.
-  // Future<Database> get database;
+  /// A list of columns that represent one-to-many relationships.
+  List<Column> get oneToManyColumns;
+
+  /// The entity definition for this repository.
+  Entity get entity;
+
+  /// The SQL query used to create the table for this entity.
+  String get createQuery;
+
+  /// Gets the database instance.
+  Future<Database> get database;
 
   /// Creates the table for this entity in the database.
   ///

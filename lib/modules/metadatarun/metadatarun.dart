@@ -22,3 +22,4 @@ export './project/queries/d_project.query.dart';
 export './teams/d_team.module.dart'; 
 export './teams/entities/d_team.entity.dart'; 
 export './teams/queries/d_team.query.dart'; 
+export './teams/queries/managed_team.query.dart'; 

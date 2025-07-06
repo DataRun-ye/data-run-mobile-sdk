@@ -41,15 +41,18 @@ class DataElement extends IdentifiableEntity {
   final String? resourceMetadataSchema;
 
   @legacy.Column(nullable: true, type: legacy.ColumnType.TEXT)
+  final String? optionSet;
+
+  @legacy.Column(nullable: true, type: legacy.ColumnType.TEXT)
   final IList<AllowedAction> allowedActions;
 
   DataElement(
-      {String? id,
+      {super.id,
       // String? uid,
-      String? name,
-      String? code,
-      String? createdDate,
-      String? lastModifiedDate,
+      super.name,
+      super.code,
+      super.createdDate,
+      super.lastModifiedDate,
       this.description,
       this.mandatory = false,
       this.type,
@@ -57,20 +60,13 @@ class DataElement extends IdentifiableEntity {
       this.resourceMetadataSchema,
       this.defaultValue,
       this.gs1Enabled = false,
+      this.optionSet,
       Iterable<AllowedAction>? allowedActions,
       this.label = const IMap.empty(),
       this.scannedCodeProperties,
-      required dirty})
+      required super.dirty})
       : this.allowedActions =
-            IList.orNull(allowedActions) ?? const IList<AllowedAction>.empty(),
-        super(
-            id: id,
-            // uid: uid,
-            name: name,
-            code: code,
-            createdDate: createdDate,
-            lastModifiedDate: lastModifiedDate,
-            dirty: dirty);
+            IList.orNull(allowedActions) ?? const IList<AllowedAction>.empty();
 
   factory DataElement.fromJson(Map<String, dynamic> json) {
     final valueType = ValueType.getValueType(json['type']);
@@ -89,6 +85,7 @@ class DataElement extends IdentifiableEntity {
         ? Map<String, String?>.from(
             json['label'] is String ? jsonDecode(json['label']) : json['label'])
         : <String, String?>{"en": json['name']};
+    final optionSet = json['optionSet'];
 
     return DataElement(
         id: json['uid'] ?? json['id'].toString(),
@@ -103,6 +100,11 @@ class DataElement extends IdentifiableEntity {
         allowedActions: allowedActions,
         mandatory: json['mandatory'] ?? false,
         gs1Enabled: json['gs1Enabled'] ?? false,
+        optionSet: optionSet != null
+            ? optionSet is String
+                ? optionSet
+                : optionSet['uid']
+            : null,
         resourceType: resourceType,
         resourceMetadataSchema: json['resourceMetadataSchema'],
         defaultValue: json['defaultValue'] != null
@@ -127,6 +129,8 @@ class DataElement extends IdentifiableEntity {
       'type': type?.name,
       'resourceType': resourceType?.name,
       'mandatory': mandatory,
+      'gs1Enabled': gs1Enabled,
+      'optionSet': optionSet,
       'defaultValue': defaultValue != null ? defaultValue.toString() : null,
       'resourceMetadataSchema': resourceMetadataSchema,
       'label': jsonEncode(label.unlockView),

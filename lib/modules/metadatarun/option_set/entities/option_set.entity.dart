@@ -1,47 +1,82 @@
-import 'dart:convert';
-
 import 'package:d2_remote/core/annotations/index.dart' as legacy;
-import 'package:d2_remote/modules/datarun/form/shared/form_option.entity.dart';
-import 'package:d2_remote/modules/datarun_shared/utilities/parsing_helpers.dart';
+import 'package:d2_remote/modules/metadatarun/option_set/entities/option.entity.dart';
 import 'package:d2_remote/shared/entities/identifiable.entity.dart';
-import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 
 @legacy.AnnotationReflectable
 @legacy.Entity(tableName: 'optionSet', apiResourceName: 'optionSets')
 class OptionSet extends IdentifiableEntity {
-  @legacy.Column(nullable: true, type: legacy.ColumnType.TEXT)
-  final IList<FormOption> options;
+  @legacy.OneToMany(table: Option)
+  List<Option>? options;
 
   OptionSet(
       {String? id,
-      // String? uid,
       String? name,
       String? code,
       String? createdDate,
       String? lastModifiedDate,
-      Iterable<FormOption>? options,
+      this.options,
       required dirty})
-      : this.options = IList.orNull(options) ?? const IList<FormOption>.empty(),
-        super(id: id,
-          // uid: uid,
-          name: name, code: code, dirty: dirty);
+      : super(
+            id: id,
+            createdDate: createdDate,
+            lastModifiedDate: lastModifiedDate,
+            name: name,
+            code: code,
+            dirty: dirty);
 
   factory OptionSet.fromJson(Map<String, dynamic> json) {
-    final options = json['options'] != null
-        ? (parseDynamicJson(json['options']) as List)
-            .map((option) => FormOption.fromJson(option))
-            .toList()
-        : <FormOption>[];
-
+    final String id = json['uid'] ?? json['id'].toString();
+    final List<Option> options = json['options'] is List<Option>
+        ? json['options']
+        : (json['options'] ?? []).map<Option>((item) {
+            final option = item is Option ? item.toJson() : item;
+            return Option.fromJson({
+              ...option,
+              'id': option['id'],
+              'optionSet': option['optionSet'] ?? id,
+              'properties': option['properties'],
+              'dirty': option['dirty'] ?? false,
+            });
+          }).toList();
     return OptionSet(
-        id: json['uid'] ?? json['id'].toString(),
-        // uid: json['uid'],
+        id: id,
         code: json['code'],
         name: json['name'],
         createdDate: json['createdDate'],
         lastModifiedDate: json['lastModifiedDate'],
         options: options,
-        dirty: json['dirty']);
+        dirty: json['dirty'] ?? false);
+  }
+
+  factory OptionSet.fromApi(Map<String, dynamic> json) {
+    final String id = json['uid'] ?? json['id'].toString();
+    return OptionSet(
+        id: id,
+        code: json['code'],
+        name: json['name'],
+        createdDate: json['createdDate'],
+        lastModifiedDate: json['lastModifiedDate'],
+        options: json['options'] != null
+            ? (json['options'] as List).asMap().entries.map<Option>((entry) {
+                final opJson = entry.value;
+                return Option(
+                  id: opJson['id'],
+                  code: opJson['code'],
+                  name: opJson['name'],
+                  displayName: opJson['displayName'],
+                  description: opJson['description'],
+                  optionSet: id,
+                  label: Map<String, String>.from(opJson['label']!),
+                  filterExpression: opJson['filterExpression'],
+                  properties: opJson['properties'],
+                  sortOrder: entry.key + 1,
+                  createdDate: opJson['createdDate'],
+                  lastModifiedDate: opJson['lastModifiedDate'],
+                  dirty: json['dirty'] ?? false,
+                );
+              }).toList()
+            : [],
+        dirty: json['dirty'] ?? false);
   }
 
   Map<String, dynamic> toJson() {
@@ -52,7 +87,7 @@ class OptionSet extends IdentifiableEntity {
       'name': this.name,
       'createdDate': this.createdDate,
       'lastModifiedDate': this.lastModifiedDate,
-      'label': jsonEncode(options.unlockView),
+      'options': this.options,
       'dirty': this.dirty
     };
   }

@@ -3,9 +3,7 @@ import 'dart:convert';
 import 'package:d2_remote/core/annotations/reflectable.annotation.dart';
 import 'package:d2_remote/core/datarun/logging/new_app_logging.dart';
 import 'package:d2_remote/core/datarun/utilities/date_helper.dart';
-import 'package:d2_remote/core/utilities/sqflite_data_store.dart';
 import 'package:d2_remote/d2_remote.dart';
-import 'package:d2_remote/modules/auth/user/queries/d_user.query.dart';
 import 'package:d2_remote/modules/datarun_shared/entities/syncable.entity.dart';
 import 'package:d2_remote/modules/datarun_shared/utilities/sync_summary.dart';
 import 'package:d2_remote/shared/queries/base.query.dart';
@@ -13,21 +11,28 @@ import 'package:d2_remote/shared/utilities/http_client.util.dart';
 import 'package:dio/dio.dart';
 import 'package:queue/queue.dart';
 import 'package:reflectable/mirrors.dart';
+import 'package:sqflite/sqflite.dart';
 
 @AnnotationReflectable
 abstract class SyncableQuery<T extends SyncableEntity> extends BaseQuery<T> {
-  SyncableQuery(DataStore<T> repository) : super(repository);
+  SyncableQuery({Database? database}) : super(database: database);
   String? assignment;
   String? team;
   String? orgUnit;
   String? form;
   int? version;
 
+  // T fromJsonInstance(Map<String, dynamic> entityMap) {
+  //   ClassMirror classMirror =
+  //       AnnotationReflectable.reflectType(T) as ClassMirror;
+  //   return classMirror.newInstance('fromJson', [entityMap]) as T;
+  // }
+
   SyncableQuery<T> byFormTemplate(String form) {
     this.form = form;
-    this.version = version;
-    final value = '${form}${version != null ? '_$version' : ''}%';
-    return this.like(attribute: 'formVersion', value: value) as SyncableQuery<T>;
+    // this.version = version;
+    // final value = '${form}${version != null ? '_$version' : ''}%';
+    return this.like(attribute: 'form', value: form);
   }
 
   /// Not Synced to server at all, no available on server
@@ -63,14 +68,20 @@ abstract class SyncableQuery<T extends SyncableEntity> extends BaseQuery<T> {
   }
 
   Future<bool> canEdit() async {
-    final user = await (D2Remote.userModule.user as UserQuery)
-        .withAuthorities()
-        .getOne();
+    final user = await D2Remote.userModule.user.withAuthorities().getOne();
     if (user == null) {
       return false;
     }
 
+    // final authorities = user.authorities;
+    // final haveChvSuperAuth =
+    //     authorities?.map((t) => t.authority).contains('ROLE_CHV_SUPERVISOR') ??
+    //         false;
+
     final entity = await getOne();
+    // final formVersion =
+    //     await FormVersionQuery().byId(entity?.formVersion).getOne();
+
     return entity?.synced == false ||
         entity?.createdBy != null /*|| haveChvSuperAuth*/;
   }
@@ -155,7 +166,7 @@ abstract class SyncableQuery<T extends SyncableEntity> extends BaseQuery<T> {
 
     final response = await HttpClient.post(
         '${this.apiResourceName as String}/bulk', uploadPayload,
-        database: await this.dataSource.database, dioTestClient: dioTestClient);
+        database: this.database, dioTestClient: dioTestClient);
 
     SyncSummary summary = SyncSummary.fromJson(response.body);
     logDebug(jsonEncode(uploadPayload.first), data: {"data": uploadPayload});
@@ -171,6 +182,12 @@ abstract class SyncableQuery<T extends SyncableEntity> extends BaseQuery<T> {
       ClassMirror classMirror =
           AnnotationReflectable.reflectType(T) as ClassMirror;
       if (syncCreated || syncUpdated) {
+        // syncableEntity.synced = true;
+        // syncableEntity.dirty = false;
+        // syncableEntity.syncFailed = false;
+        // syncableEntity.lastSyncDate = DateHelper.nowUtc();
+        // syncableEntity.lastSyncMessage = null;
+
         newEntity = classMirror.newInstance('fromJson', [
           {
             ...newEntity.toJson(),
@@ -184,6 +201,11 @@ abstract class SyncableQuery<T extends SyncableEntity> extends BaseQuery<T> {
         ]) as T;
         availableItemCount++;
       } else if (syncFailed) {
+        // syncableEntity.synced = false;
+        // syncableEntity.dirty = true;
+        // syncableEntity.syncFailed = true;
+        // syncableEntity.lastSyncDate = DateHelper.nowUtc();
+        // syncableEntity.lastSyncMessage = summary.failed[syncableEntity.id];
         newEntity = classMirror.newInstance('fromJson', [
           {
             ...newEntity.toJson(),

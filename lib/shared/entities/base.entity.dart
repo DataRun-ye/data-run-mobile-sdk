@@ -1,10 +1,9 @@
 import 'package:d2_remote/core/annotations/index.dart' as legacy;
 import 'package:d2_remote/core/datarun/utilities/date_helper.dart';
-import 'package:d2_remote/shared/mixin/d_run_base.dart';
 import 'package:d2_remote/shared/utilities/dhis_uid_generator.util.dart';
 
 // @legacy.AnnotationReflectable
-class BaseEntity implements DRunBase {
+class BaseEntity {
   @legacy.PrimaryColumn()
   late final String? id;
 

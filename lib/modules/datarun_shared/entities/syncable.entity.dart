@@ -1,6 +1,5 @@
 import 'package:d2_remote/core/annotations/index.dart' as legacy;
 import 'package:d2_remote/modules/datarun/form/models/geometry.dart';
-import 'package:d2_remote/modules/datarun/form/entities/form_version.entity.dart';
 import 'package:d2_remote/modules/metadatarun/teams/entities/d_team.entity.dart';
 import 'package:d2_remote/shared/entities/base.entity.dart';
 import 'package:d2_remote/shared/enumeration/assignment_status.dart';
@@ -63,11 +62,11 @@ class SyncableEntity extends BaseEntity {
   // @legacy.ManyToOne(table: Activity, joinColumnName: 'activity')
   // dynamic activity;
 
-  @legacy.Column(nullable: true, type: legacy.ColumnType.TEXT)
+  @legacy.Column(nullable: false, type: legacy.ColumnType.TEXT)
   final String? form;
 
-  @legacy.ManyToOne(table: FormVersion, joinColumnName: 'formVersion')
-  dynamic formVersion;
+  @legacy.Column(nullable: false, type: legacy.ColumnType.TEXT)
+  String formVersion;
 
   /// assignment id or null if form is not assigned
   @legacy.Column(nullable: true)
@@ -149,18 +148,18 @@ class SyncableEntity extends BaseEntity {
     // }
 
     if (team != null && team.runtimeType != String) {
-      syncableToUpload['team'] = team['uid'] ?? team['id'];
+      syncableToUpload['team'] = team['id'];
     }
 
-    if (form != null) {
-      syncableToUpload['form'] = form;
-    } else if (formVersion != null && formVersion.runtimeType != String) {
-      // make formVersion['uid'];
-      syncableToUpload['form'] = formVersion['formTemplate'];
-    } else {
-      final formAndVersion = (formVersion as String).split('_');
-      syncableToUpload['form'] = formAndVersion[0];
-    }
+    // if (form != null) {
+    //   syncableToUpload['form'] = form;
+    // } else if (formVersion != null && formVersion.runtimeType != String) {
+    //   // make formVersion['uid'];
+    //   syncableToUpload['form'] = formVersion['formTemplate'];
+    // } else {
+    //   final formAndVersion = (formVersion as String).split('_');
+    //   syncableToUpload['form'] = formAndVersion[0];
+    // }
 
     return syncableToUpload;
   }

@@ -22,12 +22,10 @@ class FieldTemplate extends Template
     with ElementAttributesMixin, EquatableMixin {
   final String? id;
   final String? description;
-  final String? path;
-
+  final String path;
   final String? code;
   final String? name;
   final int order;
-
   final ValueType? type;
   final String? listName;
   final String? optionSet;
@@ -37,19 +35,13 @@ class FieldTemplate extends Template
   final String? choiceFilter;
   final dynamic defaultValue;
   final String? parent;
-
-  // final IList<FieldTemplate> fields;
   final IMap<String, dynamic> label;
-
   final IMap<String, dynamic>? properties;
-
   final IList<Rule> rules;
   final IList<FormOption> options;
-
   final String? constraint;
   final IMap<String, String>? constraintMessage;
   final String? calculation;
-
   final AttributeType? attributeType;
   final ScannedCodeProperties? scannedCodeProperties;
   final IList<String> appearance;
@@ -61,11 +53,13 @@ class FieldTemplate extends Template
   final IList<String> displayAttributes;
   final IList<AllowedAction> allowedActions;
 
+  // final ValueTypeRenderingType valueTypeRendering;
+
   FieldTemplate({
     this.id,
     this.code,
     this.description,
-    this.path,
+    required this.path,
     this.mandatory = false,
     this.mainField = false,
     this.readOnly = false,
@@ -74,7 +68,7 @@ class FieldTemplate extends Template
     this.optionSet,
     this.type,
     this.name,
-    // this.fieldValueRenderingType,
+    // this.valueTypeRendering = ValueTypeRenderingType.DEFAULT,
     this.resourceType,
     this.resourceMetadataSchema,
     this.choiceFilter,
@@ -83,23 +77,17 @@ class FieldTemplate extends Template
     this.parent,
     this.attributeType,
     this.gs1Enabled = false,
-    // this.itemTitle,
     Iterable<Rule>? rules,
     Iterable<FormOption>? options,
     Iterable<String>? appearance,
     Iterable<String>? displayAttributes,
     Iterable<AllowedAction>? allowedActions,
-    // Iterable<FieldTemplate>? fields,
-    // List<FieldTemplate> fields = const [],
-    // List<FormOption> options = const [],
     this.label = const IMap.empty(),
     this.properties,
     this.scannedCodeProperties,
     this.constraint,
     this.constraintMessage,
-  })  : /*this.fields =
-            IList.orNull(fields) ?? const IList<FieldTemplate>.empty(),*/
-        this.options = IList.orNull(options) ?? const IList<FormOption>.empty(),
+  })  : this.options = IList.orNull(options) ?? const IList<FormOption>.empty(),
         this.rules = IList.orNull(rules) ?? const IList<Rule>.empty(),
         this.appearance =
             IList.orNull(appearance) ?? const IList<String>.empty(),
@@ -119,11 +107,13 @@ class FieldTemplate extends Template
         resourceMetadataSchema,
         choiceFilter,
         defaultValue,
-        appearance
+        appearance,
+        // valueTypeRendering
       ];
 
   factory FieldTemplate.fromJson(Map<String, dynamic> json) {
     final valueType = ValueType.getValueType(json['type']);
+    // final valueTypeRendering = ValueTypeRenderingType.valueOf(json['type']);
 
     final resourceType = json['resourceType'] != null
         ? MetadataResourceType.getType(json['resourceType'])
@@ -141,16 +131,6 @@ class FieldTemplate extends Template
             .map<AllowedAction>((action) => AllowedAction.getValueType(action))
             .toList()
         : <AllowedAction>[];
-
-    final optionMap = json['optionMap'] != null
-        ? Map<String, List<FormOption>>.from(json['optionMap'] is String
-            ? jsonDecode(json['optionMap'])
-            : json['optionMap'])
-        : <String, List<FormOption>>{};
-
-    final listName = json['listName'];
-
-    final options = optionMap[listName] ?? [];
 
     final label = json['label'] != null
         ? Map<String, String?>.from(
@@ -188,7 +168,6 @@ class FieldTemplate extends Template
       name: json['name'],
       code: json['code'],
       description: json['description'],
-      options: options,
       allowedActions: allowedActions,
       displayAttributes: displayAttributes,
       path: json['path'],
@@ -199,18 +178,15 @@ class FieldTemplate extends Template
       gs1Enabled: json['gs1Enabled'] ?? false,
       listName: json['listName'],
       optionSet: json['optionSet'],
-      // fields: fields,
-      // itemTitle: json['itemTitle'],
       choiceFilter: json['choiceFilter'],
       calculation: json['calculation'],
       rules: rules,
       label: label.lock,
       properties: properties.lock,
-      parent: json['section'],
-      // parentPath: json['parentPath'],
+      parent: json['parent'],
       resourceType: resourceType,
       resourceMetadataSchema: json['resourceMetadataSchema'],
-      // fieldValueRenderingType: json['fieldValueRenderingType'],
+      // valueTypeRendering: valueTypeRendering,
       defaultValue: json['defaultValue'] != null
           ? json['defaultValue'] is String
               ? json['defaultValue']
@@ -233,34 +209,25 @@ class FieldTemplate extends Template
       'path': path,
       'name': name,
       'description': description,
-      'options': jsonEncode(
-          options.unlockView.map((option) => option.toJson()).toList()),
+      'options': options.unlockView.map((option) => option.toJson()).toList(),
       'mandatory': mandatory,
       'readOnly': readOnly,
       'mainField': mainField,
       'listName': listName,
       'optionSet': optionSet,
-      // 'itemTitle': itemTitle,
       'choiceFilter': choiceFilter,
       'calculation': calculation,
       'defaultValue': defaultValue,
       'resourceMetadataSchema': resourceMetadataSchema,
-      // 'fieldValueRenderingType': fieldValueRenderingType,
-      // 'fields':
-      //     jsonEncode(fields.unlockView.map((field) => field.toJson()).toList()),
-      'rules':
-          jsonEncode(rules.unlockView.map((rule) => rule.toJson()).toList()),
-      'label': jsonEncode(label.unlockView),
+      // 'valueTypeRendering': valueTypeRendering.name,
+      'rules': rules.unlockView.map((rule) => rule.toJson()).toList(),
+      'label': label.unlockView,
       'constraint': constraint,
-      'constraintMessage': constraintMessage != null
-          ? jsonEncode(constraintMessage!.unlockView)
-          : null,
-      'properties': jsonEncode(properties?.unlockView),
+      'constraintMessage': constraintMessage?.unlockView,
+      'properties': properties?.unlockView,
       'parent': parent,
-      'appearance': jsonEncode(appearance.unlockView),
-      'scannedCodeProperties': scannedCodeProperties?.toJson() != null
-          ? jsonEncode(scannedCodeProperties!.toJson())
-          : null,
+      'appearance': appearance.unlockView,
+      'scannedCodeProperties': scannedCodeProperties?.toJson(),
     };
   }
 
@@ -333,4 +300,7 @@ class FieldTemplate extends Template
       allowedActions: allowedActions ?? this.allowedActions,
     );
   }
+
+  @override
+  bool get repeatable => false;
 }

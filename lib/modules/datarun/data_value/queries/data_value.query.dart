@@ -1,13 +1,33 @@
 import 'package:d2_remote/core/annotations/index.dart';
 import 'package:d2_remote/modules/datarun/data_value/entities/data_value.entity.dart';
-import 'package:d2_remote/modules/datarun/data_value/repository/data_value_repository.dart';
 import 'package:d2_remote/shared/queries/base.query.dart';
-import 'package:injectable/injectable.dart';
+import 'package:sqflite/sqflite.dart';
 
 @AnnotationReflectable
-@LazySingleton(/*as: BaseQuery<DataValue>*/)
 class DataValueQuery extends BaseQuery<DataValue> {
-  final DataValueRepository dataSource;
+  DataValueQuery({Database? database}) : super(database: database);
+  String? submission;
+  String? dataElement;
+  String? parent;
+  String? templatePath;
 
-  DataValueQuery(this.dataSource) : super(dataSource);
+  DataValueQuery byTemplatePath(String templatePath) {
+    this.templatePath = templatePath;
+    return this.where(attribute: 'templatePath', value: templatePath);
+  }
+
+  DataValueQuery bySubmission(String submission) {
+    this.submission = submission;
+    return this.where(attribute: 'submission', value: submission);
+  }
+
+  DataValueQuery byParent(String parent) {
+    this.parent = parent;
+    return this.where(attribute: 'parent', value: parent);
+  }
+
+  DataValueQuery byDataElement(String dataElement) {
+    this.dataElement = dataElement;
+    return this.where(attribute: 'dataElement', value: dataElement);
+  }
 }

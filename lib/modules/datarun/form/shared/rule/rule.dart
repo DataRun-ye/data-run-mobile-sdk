@@ -10,7 +10,7 @@ class Rule with EquatableMixin {
 
   final String expression;
 
-  final ActionType? action;
+  final RuleActionType? action;
   final RuleAction ruleAction;
   final IMap<String, String>? message;
   final FilterInfo? filterInfo;
@@ -44,7 +44,7 @@ class Rule with EquatableMixin {
         : <String, String>{};
     return Rule(
         field: json['field'],
-        action: ActionType.getAction(json['action']),
+        action: RuleActionType.getAction(json['action']),
         ruleAction: RuleAction.fromJson({
           'action': json['action'],
           'expression': json['expression'],
@@ -70,7 +70,7 @@ class Rule with EquatableMixin {
       'expression': expression,
       'action': action?.name,
       'ruleAction': ruleAction.toJson(),
-      'message': message != null ? jsonEncode(message?.unlock) : null,
+      'message': message?.unlock,
       'assignedValue': assignedValue,
       'filterInfo': filterInfo != null ? filterInfo!.toJson() : null,
     };
@@ -107,8 +107,8 @@ class FilterInfo {
 
   Map<String, dynamic> toJson() {
     return {
-      'optionsToHide': optionsToHide != null ? jsonEncode(optionsToHide) : null,
-      'optionsToShow': optionsToShow != null ? jsonEncode(optionsToShow) : null,
+      'optionsToHide': optionsToHide,
+      'optionsToShow': optionsToShow,
     };
   }
 }

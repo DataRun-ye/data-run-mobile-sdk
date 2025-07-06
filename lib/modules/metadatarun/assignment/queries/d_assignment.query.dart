@@ -1,23 +1,20 @@
 import 'package:d2_remote/core/annotations/index.dart';
 import 'package:d2_remote/modules/metadatarun/assignment/entities/d_assignment.entity.dart';
-import 'package:d2_remote/modules/metadatarun/assignment/repository/assignment_repository.dart';
 import 'package:d2_remote/shared/models/request_progress.model.dart';
 import 'package:d2_remote/shared/queries/base.query.dart';
 import 'package:d2_remote/shared/utilities/http_client.util.dart';
 import 'package:dio/dio.dart';
-import 'package:injectable/injectable.dart';
+import 'package:sqflite/sqflite.dart';
 
 @AnnotationReflectable
 @Query(type: QueryType.METADATA)
-@lazySingleton
 class AssignmentQuery extends BaseQuery<Assignment> {
-  final AssignmentRepository dataSource;
   String? activity;
   String? warehouse;
   String? team;
   String? orgUnit;
 
-  AssignmentQuery(this.dataSource) : super(dataSource);
+  AssignmentQuery({Database? database}) : super(database: database);
 
   AssignmentQuery byActivity(String activity) {
     this.activity = activity;
@@ -61,7 +58,7 @@ class AssignmentQuery extends BaseQuery<Assignment> {
     final dataRunUrl = await this.dataRunUrl();
 
     final response = await HttpClient.get(dataRunUrl,
-        database: await this.dataSource.database, dioTestClient: dioTestClient);
+        database: this.database, dioTestClient: dioTestClient);
 
     List data = response.body[this.apiResourceName]?.toList();
 

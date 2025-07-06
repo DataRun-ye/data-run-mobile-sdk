@@ -1,29 +1,23 @@
 import 'package:d2_remote/core/annotations/index.dart';
+import 'package:d2_remote/core/utilities/repository.dart';
 import 'package:d2_remote/modules/datarun/form/entities/form_template.entity.dart';
-import 'package:d2_remote/modules/datarun/form/repository/form_template_repository.dart';
 import 'package:d2_remote/modules/datarun_shared/utilities/active_status.dart';
 import 'package:d2_remote/modules/metadatarun/activity/entities/d_activity.entity.dart';
-import 'package:d2_remote/modules/metadatarun/activity/repository/activity_repository.dart';
 import 'package:d2_remote/shared/queries/base.query.dart';
-import 'package:injectable/injectable.dart';
 import 'package:reflectable/reflectable.dart';
+import 'package:sqflite/sqflite.dart';
 
 @AnnotationReflectable
 @Query(type: QueryType.METADATA)
-@lazySingleton
 class ActivityQuery extends BaseQuery<Activity> {
-  final ActivityRepository dataSource;
-  final FormTemplateRepository formTemplateRepository;
-
-  ActivityQuery(this.dataSource, this.formTemplateRepository)
-      : super(dataSource);
+  ActivityQuery({Database? database}) : super(database: database);
   String? project;
   ActiveStatus? activeStatus;
 
   ActivityQuery withFormTemplates() {
-    final Column? relationColumn = formTemplateRepository.columns.firstWhere(
-        (column) =>
-            column.relation?.referencedEntity?.tableName == this.tableName);
+    final formTemplate = Repository<FormTemplate>();
+    final Column? relationColumn = formTemplate.columns.firstWhere((column) =>
+        column.relation?.referencedEntity?.tableName == this.tableName);
 
     if (relationColumn != null) {
       ColumnRelation relation = ColumnRelation(

@@ -1,19 +1,21 @@
 import 'dart:convert';
 
 import 'package:d2_remote/core/annotations/index.dart' as legacy;
+import 'package:d2_remote/core/utilities/list_extensions.dart';
 import 'package:d2_remote/modules/datarun/form/entities/form_template.entity.dart';
-import 'package:d2_remote/modules/datarun/form/shared/field_template/json_factory.dart';
 import 'package:d2_remote/modules/datarun/form/shared/field_template/field_template.entity.dart';
 import 'package:d2_remote/modules/datarun/form/shared/field_template/section_template.entity.dart';
 import 'package:d2_remote/modules/datarun/form/shared/field_template/template.dart';
 import 'package:d2_remote/modules/datarun/form/shared/form_option.entity.dart';
 import 'package:d2_remote/modules/datarun/form/shared/option_set.entity.dart';
-import 'package:d2_remote/modules/datarun/form/shared/template_extensions/form_traverse_extension.dart';
 import 'package:d2_remote/modules/datarun/form/shared/template_extensions/template_path_walking_service.dart';
 import 'package:d2_remote/modules/datarun/form/shared/validation_strategy.dart';
+import 'package:d2_remote/modules/datarun/form/shared/value_type.dart';
 import 'package:d2_remote/modules/datarun_shared/utilities/parsing_helpers.dart';
 import 'package:d2_remote/shared/entities/identifiable.entity.dart';
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
+
+part 'form_traverse_extension.dart';
 
 @legacy.AnnotationReflectable
 @legacy.Entity(tableName: 'formVersion', apiResourceName: 'formVersions')
@@ -22,14 +24,14 @@ class FormVersion extends IdentifiableEntity
   @legacy.ManyToOne(table: FormTemplate, joinColumnName: 'formTemplate')
   dynamic formTemplate;
 
-  @legacy.Column(nullable: true, type: legacy.ColumnType.TEXT)
-  List<Template> fields = [];
+  // @legacy.Column(nullable: true, type: legacy.ColumnType.TEXT)
+  // List<Template> fields = [];
 
   @legacy.Column(nullable: true, type: legacy.ColumnType.TEXT)
   List<FormOption> options = [];
 
-  @legacy.Column(nullable: true, type: legacy.ColumnType.TEXT)
-  List<DOptionSet> optionSets = [];
+  // @legacy.Column(nullable: true, type: legacy.ColumnType.TEXT)
+  // List<DOptionSet> optionSets = [];
 
   @legacy.Column(nullable: false, type: legacy.ColumnType.TEXT)
   Map<String, String> label = {};
@@ -38,10 +40,10 @@ class FormVersion extends IdentifiableEntity
   String defaultLocal;
 
   @legacy.Column(nullable: true, type: legacy.ColumnType.TEXT)
-  IList<Template> fieldsConf;
+  IList<FieldTemplate> fields;
 
   @legacy.Column(nullable: true, type: legacy.ColumnType.TEXT)
-  IList<Template> sections;
+  IList<SectionTemplate> sections;
 
   @legacy.Column(nullable: true, type: legacy.ColumnType.TEXT)
   String? description;
@@ -49,9 +51,12 @@ class FormVersion extends IdentifiableEntity
   @legacy.Column(type: legacy.ColumnType.TEXT, nullable: false)
   ValidationStrategy validationStrategy;
 
+  @legacy.Column(nullable: false, type: legacy.ColumnType.TEXT)
+  String versionUid;
+
   /// current Version
   @legacy.Column(nullable: false, type: legacy.ColumnType.INTEGER)
-  int version;
+  int versionNumber;
 
   // @legacy.Column(nullable: true, type: legacy.ColumnType.TEXT)
   // List<Template> flattenedFields = [];
@@ -65,21 +70,21 @@ class FormVersion extends IdentifiableEntity
     String? lastModifiedDate,
     this.description,
     this.formTemplate,
-    required this.version,
+    required this.versionNumber,
+    required this.versionUid,
     required this.defaultLocal,
     required this.validationStrategy,
-    List<Template> fields = const [],
-    // List<Template> flattenedFields = const [],
-    // Map<String, Template>? flattenFieldsMap,
+    Iterable<Template> treeFields = const [],
     List<FormOption> options = const [],
     List<DOptionSet> optionSets = const [],
     Map<String, String> label = const {},
     List<String> orgUnits = const [],
-    Iterable<Template>? fieldsConf,
-    Iterable<Template>? sections,
+    Iterable<FieldTemplate>? fields,
+    Iterable<SectionTemplate>? sections,
     required dirty,
-  })  : this.fieldsConf = IList.orNull(fieldsConf) ?? IList(),
+  })  : this.fields = IList.orNull(fields) ?? IList(),
         this.sections = IList.orNull(sections) ?? IList(),
+        this.treeFields = IList.orNull(treeFields) ?? IList(),
         // this.flattenFieldsMap = IMap.orNull(flattenFieldsMap) ?? IMap(),
         super(
           id: id,
@@ -90,9 +95,8 @@ class FormVersion extends IdentifiableEntity
           lastModifiedDate: lastModifiedDate,
           dirty: dirty,
         ) {
-    this.fields.addAll(fields);
     this.options.addAll(options);
-    this.optionSets.addAll(optionSets);
+    // this.optionSets.addAll(optionSets);
     this.label.addAll(label);
   }
 
@@ -112,29 +116,23 @@ class FormVersion extends IdentifiableEntity
             .toList()
         : <FormOption>[];
 
-    final fields = json['fields'] != null
-        ? (parseDynamicJson(json['fields']) as List)
-            .map((field) => TemplateJsonFactory.fromJsonFactory(field))
+    final treeFields = json['treeFields'] != null
+        ? (parseDynamicJson(json['treeFields']) as List)
+            .map((field) => Template.fromJsonFactory(field))
             .toList()
         : <Template>[];
 
-    final fieldsConf = json['fieldsConf'] != null
-        ? (parseDynamicJson(json['fieldsConf']) as List)
+    final fields = json['fields'] != null
+        ? (parseDynamicJson(json['fields']) as List)
             .map((field) => FieldTemplate.fromJson(field))
             .toList()
-        : <Template>[];
+        : <FieldTemplate>[];
 
     final sections = json['sections'] != null
         ? (parseDynamicJson(json['sections']) as List)
             .map((field) => SectionTemplate.fromJson(field))
             .toList()
-        : <Template>[];
-
-    // final flattenedFields = json['flattenedFields'] != null
-    //     ? (parseDynamicJson(json['flattenedFields']) as List)
-    //         .map((field) => TemplateJsonFactory.fromJsonFactory(field))
-    //         .toList()
-    //     : <Template>[];
+        : <SectionTemplate>[];
 
     final optionSets = json['optionSets'] != null
         ? (parseDynamicJson(json['optionSets']) as List)
@@ -144,21 +142,20 @@ class FormVersion extends IdentifiableEntity
 
     return FormVersion(
       id: json['uid'] ?? json['id'].toString(),
-      // uid: json['uid'],
       code: json['code'],
       name: json['name'],
       validationStrategy: validationStrategy,
-      version: json['version'],
+      versionNumber: json['versionNumber'],
+      versionUid: json['versionUid'],
       formTemplate: json['formTemplate'],
       label: json['label'] != null
           ? Map<String, String>.from(json['label'] is String
               ? jsonDecode(json['label'])
               : json['label'])
-          : {"en": json['name']},
+          : {"en": json['name'], "ar": json['name']},
       defaultLocal: json['defaultLocal'] ?? 'en',
+      treeFields: treeFields,
       fields: fields,
-      // flattenedFields: flattenedFields,
-      fieldsConf: fieldsConf,
       sections: sections,
       options: options,
       optionSets: optionSets,
@@ -182,27 +179,17 @@ class FormVersion extends IdentifiableEntity
 
     final fields = json['fields'] != null
         ? (parseDynamicJson(json['fields']) as List)
-            .map((field) => TemplateJsonFactory.fromJsonFactory(field))
+            .map((field) => FieldTemplate.fromJson(field))
             .toList()
         : <FieldTemplate>[];
 
-    final fieldsConf = json['fieldsConf'] != null
-        ? (parseDynamicJson(json['fieldsConf']) as List)
-            .map((field) => TemplateJsonFactory.fromJsonFactory(field))
-            .toList()
-        : <Template>[];
-
     final sections = json['sections'] != null
         ? (parseDynamicJson(json['sections']) as List)
-            .map((field) => TemplateJsonFactory.fromJsonFactory(field))
+            .map((field) => SectionTemplate.fromJson(field))
             .toList()
-        : <Template>[];
+        : <SectionTemplate>[];
 
-    // final flattenedFields = json['flattenedFields'] != null
-    //     ? (parseDynamicJson(json['flattenedFields']) as List)
-    //         .map((field) => TemplateJsonFactory.fromJsonFactory(field))
-    //         .toList()
-    //     : <FieldTemplate>[];
+    final tree = buildTree(fieldsAndSections: [...sections, ...fields]);
 
     final options = json['options'] != null
         ? (parseDynamicJson(json['options']) as List)
@@ -217,22 +204,21 @@ class FormVersion extends IdentifiableEntity
         : <DOptionSet>[];
 
     return FormVersion(
-      id: json['uid'] ?? json['id'].toString(),
-      // uid: json['uid'],
+      id: json['uid'] ?? json['id']?.toString(),
       code: json['code'],
       name: json['name'],
       validationStrategy: validationStrategy,
-      version: json['version'],
+      versionNumber: json['versionNumber'],
+      versionUid: json['versionUid'],
       formTemplate: json['formTemplate'],
       label: json['label'] != null
           ? Map<String, String>.from(json['label'] is String
               ? jsonDecode(json['label'])
               : json['label'])
-          : {"en": json['name']},
+          : {"en": json['name'], "ar": json['name']},
       defaultLocal: json['defaultLocal'] ?? 'en',
+      treeFields: tree,
       fields: fields,
-      // flattenedFields: flattenedFields,
-      fieldsConf: fieldsConf,
       sections: sections,
       options: options,
       optionSets: optionSets,
@@ -251,40 +237,73 @@ class FormVersion extends IdentifiableEntity
       'code': code,
       'name': name,
       'validationStrategy': validationStrategy.name,
-      // 'activity': activity,
-      'version': version,
+      'versionNumber': versionNumber,
+      'versionUid': versionUid,
       'formTemplate': formTemplate,
       'label': jsonEncode(label),
       'defaultLocal': defaultLocal,
       'description': description,
       // 'orgUnits': jsonEncode(orgUnits),
-      'fields': jsonEncode(fields
-          .map((field) => TemplateJsonFactory.toJsonFactory(field))
-          .toList()),
-      // 'flattenedFields': jsonEncode(flattenedFields
-      //     .map((field) => TemplateJsonFactory.toJsonFactory(field))
-      //     .toList()),
-      'fieldsConf': jsonEncode(fieldsConf.unlock
-          .map((field) => TemplateJsonFactory.toJsonFactory(field))
-          .toList()),
-      'sections': jsonEncode(sections.unlock
-          .map((field) => TemplateJsonFactory.toJsonFactory(field))
-          .toList()),
+      'treeFields':
+          jsonEncode(treeFields.map((field) => field.toJson()).toList()),
+      'fields':
+          jsonEncode(fields.unlock.map((field) => field.toJson()).toList()),
+      // jsonEncode(fields.unlock.map((field) => field.toJson()).toList()),
+      'sections':
+          jsonEncode(sections.unlock.map((field) => field.toJson()).toList()),
+      // jsonEncode(sections.unlock.map((field) => field.toJson()).toList()),
       'options': jsonEncode(options.map((option) => option.toJson()).toList()),
-      'optionSets': jsonEncode(
-          optionSets.map((optionSet) => optionSet.toJson()).toList()),
+      // 'optionSets': jsonEncode(
+      //     optionSets.map((optionSet) => optionSet.toJson()).toList()),
       'createdDate': createdDate,
       'lastModifiedDate': lastModifiedDate,
       'dirty': dirty,
     };
   }
 
-  @legacy.Column(nullable: true, type: legacy.ColumnType.TEXT)
-  IMap<String, Template>? flattenFieldsMap;
-
-  @legacy.Column(nullable: true, type: legacy.ColumnType.TEXT)
-  IList<Template>? treeFields;
-
   @override
-  Iterable<Template> get flatFieldsList => formFlatFields.values;
+  Iterable<Template> get flatFieldsList => [...sections, ...fields];
+
+// @legacy.Column(nullable: true, type: legacy.ColumnType.TEXT)
+// @visibleForTesting
+// IMap<String, Template>? flattenFieldsMap;
+
+  @legacy.Column(nullable: true, type: legacy.ColumnType.TEXT)
+  IList<Template> treeFields;
+
+// @override
+// Iterable<Template> get flatFieldsList => formFlatFields.values;
+}
+
+List<Template> buildTree({
+  // required List<SectionTemplate> sections,
+  required List<Template> fieldsAndSections,
+}) {
+  // 1) Create a lookup of all nodes by their id:
+  final IMap<String, Template> lookup = IMap.fromIterable(fieldsAndSections,
+      keyMapper: (template) => template.id!,
+      valueMapper: (template) => template);
+
+  // 2) Link children into parents:
+  final List<Template> roots = [];
+  lookup.forEach((id, node) {
+    if (node.parent == null || !lookup.containsKey(node.parent!)) {
+      // no parent in our data ⇒ this is a root
+      roots.add(node);
+    } else {
+      lookup[node.parent!]!.children.add(node);
+    }
+  });
+
+  // 3) Optional: sort each node’s children by the `order` property:
+  void sortRecursively(List<Template> list) {
+    list.sort((a, b) => a.order.compareTo(b.order));
+    for (var n in list) {
+      if (n.children.isNotEmpty) sortRecursively(n.children);
+    }
+  }
+
+  sortRecursively(roots);
+
+  return roots;
 }

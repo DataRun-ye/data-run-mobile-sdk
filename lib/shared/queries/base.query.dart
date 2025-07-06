@@ -3,8 +3,7 @@
 ///
 import 'package:d2_remote/core/annotations/index.dart';
 import 'package:d2_remote/core/datarun/utilities/date_helper.dart';
-import 'package:d2_remote/core/utilities/sqflite_data_store.dart';
-import 'package:d2_remote/shared/queries/base.repository.dart';
+import 'package:d2_remote/core/utilities/repository.dart';
 import 'package:d2_remote/shared/utilities/data-run-url-generator.util.dart';
 import 'package:d2_remote/shared/entities/base.entity.dart';
 import 'package:d2_remote/shared/models/request_progress.model.dart';
@@ -19,10 +18,12 @@ import 'package:d2_remote/shared/utilities/sort_order.util.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:reflectable/mirrors.dart';
+import 'package:sqflite/sqflite.dart';
 
 @AnnotationReflectable
-class BaseQuery<T extends BaseEntity> implements BaseRepository<T> {
-  late DataStore<T> dataSource;
+class BaseQuery<T extends BaseEntity> {
+  Database? database;
+  late Repository repository;
   dynamic data;
   List<String>? fields;
   Column? primaryKey;
@@ -35,57 +36,43 @@ class BaseQuery<T extends BaseEntity> implements BaseRepository<T> {
   List<ColumnRelation> relations = [];
   MergeMode _mergeMode = MergeMode.Replace;
 
-  // NMC
-  LogicalOperator operator = LogicalOperator.AND;
+  BaseQuery({this.database}) {
+    this.repository = Repository<T>();
+    this.tableName = repository.entity.tableName;
+    this.apiResourceName = repository.entity.apiResourceName;
 
-  BaseQuery(this.dataSource) {
-    this.tableName = dataSource.entity.tableName;
-    this.apiResourceName = dataSource.entity.apiResourceName;
-
-    Iterable<Column> newColumns = dataSource.columns.where((column) =>
+    Iterable<Column> newColumns = repository.columns.where((column) =>
         column.relation == null ||
         column.relation?.relationType != RelationType.OneToMany);
 
     this.fields = newColumns.map((column) => column.name ?? '').toList();
-    this.primaryKey = dataSource.columns.firstWhere((column) => column.primary);
+    this.primaryKey = repository.columns.firstWhere((column) => column.primary);
   }
 
   set mergeMode(MergeMode mergeMode) {
     this._mergeMode = mergeMode;
   }
 
-  BaseQuery<T> setOperator(LogicalOperator operator) {
-    operator = operator;
-    return this;
-  }
-
-  BaseQuery<T> resetFilters() {
-    id = null;
-    filters?.clear();
-    operator = LogicalOperator.AND;
-    return this;
-  }
-
-  BaseQuery<T> select(List<String> fields) {
+  select(List<String> fields) {
     this.fields = fields;
     return this;
   }
 
-  BaseQuery<T> byId(String id) {
+  byId(String id) {
     this.id = id;
     this.filters = null;
     return this;
   }
 
-  BaseQuery<T> byIds(List<String> ids) {
+  byIds(List<String> ids) {
     this.id = null;
     return this.whereIn(attribute: 'id', values: ids, merge: false);
   }
 
-  BaseQuery<T> whereIn(
+  whereIn(
       {required String attribute,
       required List<String> values,
-      bool merge = false}) {
+      required bool merge}) {
     if (merge) {
       this.filters?.add(QueryFilter(
           attribute: attribute, condition: QueryCondition.In, value: values));
@@ -99,7 +86,7 @@ class BaseQuery<T extends BaseEntity> implements BaseRepository<T> {
     return this;
   }
 
-  BaseQuery<T> where({required String attribute, @required dynamic value}) {
+  where({required String attribute, @required dynamic value}) {
     this.filters?.add(QueryFilter(
         attribute: attribute, condition: QueryCondition.Equal, value: value));
 
@@ -107,7 +94,7 @@ class BaseQuery<T extends BaseEntity> implements BaseRepository<T> {
   }
 
   // NMC
-  BaseQuery<T> whereNotIn(
+  whereNotIn(
       {required String attribute,
       required List<String> values,
       required bool merge}) {
@@ -124,7 +111,7 @@ class BaseQuery<T extends BaseEntity> implements BaseRepository<T> {
     return this;
   }
 
-  BaseQuery<T> whereNeq({required String attribute, @required dynamic value}) {
+  whereNeq({required String attribute, @required dynamic value}) {
     this.filters?.add(QueryFilter(
         attribute: attribute, condition: QueryCondition.Neq, value: value));
 
@@ -133,13 +120,13 @@ class BaseQuery<T extends BaseEntity> implements BaseRepository<T> {
 
   //
 
-  BaseQuery<T> like({required String attribute, required dynamic value}) {
+  like({required String attribute, required dynamic value}) {
     this.filters?.add(QueryFilter(
         attribute: attribute, condition: QueryCondition.Like, value: value));
     return this;
   }
 
-  BaseQuery<T> ilike(
+  ilike(
       {required String attribute,
       required dynamic value,
       String? filterCondition,
@@ -155,8 +142,7 @@ class BaseQuery<T extends BaseEntity> implements BaseRepository<T> {
     return this;
   }
 
-  BaseQuery<T> greaterThan(
-      {required String attribute, required dynamic value}) {
+  greaterThan({required String attribute, required dynamic value}) {
     this.filters?.add(QueryFilter(
         attribute: attribute,
         condition: QueryCondition.GreaterThan,
@@ -164,8 +150,7 @@ class BaseQuery<T extends BaseEntity> implements BaseRepository<T> {
     return this;
   }
 
-  BaseQuery<T> greaterThanOrEqual(
-      {required String attribute, required dynamic value}) {
+  greaterThanOrEqual({required String attribute, required dynamic value}) {
     this.filters?.add(QueryFilter(
         attribute: attribute,
         condition: QueryCondition.GreaterThanOrEqualTo,
@@ -173,7 +158,7 @@ class BaseQuery<T extends BaseEntity> implements BaseRepository<T> {
     return this;
   }
 
-  BaseQuery<T> lessThan({required String attribute, @required dynamic value}) {
+  lessThan({required String attribute, @required dynamic value}) {
     this.filters?.add(QueryFilter(
         attribute: attribute,
         condition: QueryCondition.LessThan,
@@ -181,8 +166,7 @@ class BaseQuery<T extends BaseEntity> implements BaseRepository<T> {
     return this;
   }
 
-  BaseQuery<T> lessThanOrEqual(
-      {required String attribute, required dynamic value}) {
+  lessThanOrEqual({required String attribute, required dynamic value}) {
     this.filters?.add(QueryFilter(
         attribute: attribute,
         condition: QueryCondition.LessThanOrEqualTo,
@@ -190,12 +174,12 @@ class BaseQuery<T extends BaseEntity> implements BaseRepository<T> {
     return this;
   }
 
-  BaseQuery<T> orderBy({required String attribute, required SortOrder order}) {
-    this.sortOrder[attribute] = order;
+  orderBy({required String attribute, required SortOrder sortOrder}) {
+    this.sortOrder[attribute] = sortOrder;
     return this;
   }
 
-  BaseQuery<T> setData(dynamic data) {
+  setData(dynamic data) {
     this.data = data;
     return this;
   }
@@ -216,37 +200,34 @@ class BaseQuery<T extends BaseEntity> implements BaseRepository<T> {
         fields: this.fields as List<String>,
         filters: filters,
         relations: this.relations,
-        columns: this.dataSource.columns);
+        columns: this.repository.columns);
   }
 
   Future<List<T>> get(
       {Dio? dioTestClient, bool? online, int? limit, int? offset}) async {
     if (online == true) {
-      return this.fetchOnline(dioTestClient: dioTestClient);
+      return this._fetchOnline(dioTestClient: dioTestClient);
     }
 
     if (this.id != null) {
-      return this.dataSource.find(
+      return this.repository.find(
           id: this.id,
           fields: this.fields as List<String>,
-          // database: this.database,
-          relations: this.relations);
+          database: this.database,
+          relations: this.relations) as Future<List<T>>;
     }
 
-    return this.dataSource.findAll(
-        // database: this.database,
+    return this.repository.findAll(
+        database: this.database,
         filters: this.filters,
         fields: this.fields as List<String>,
         sortOrder: this.sortOrder,
-        relations: this.relations,
-        operator: operator,
-        offset: offset,
-        limit: limit);
+        relations: this.relations) as Future<List<T>>;
   }
 
   Future<T?> getOne({Dio? dioTestClient, bool? online}) async {
     if (online == true) {
-      return (await this.fetchOnline(dioTestClient: dioTestClient))[0];
+      return (await this._fetchOnline(dioTestClient: dioTestClient))[0];
     }
 
     List<T> results = await this.get();
@@ -256,65 +237,50 @@ class BaseQuery<T extends BaseEntity> implements BaseRepository<T> {
 
   Future<int> save({SaveOptions? saveOptions}) async {
     if (this.data is List) {
-      return this.dataSource.saveMany(
+      return this.repository.saveMany(
           entities: this.data as List<T>,
-          // database: this.database,
+          database: this.database,
           mergeMode: this._mergeMode,
           saveOptions: saveOptions);
     }
-    if (this.data != null && this.data!.lastModifiedDate == null) {
-      ClassMirror classMirror =
-          AnnotationReflectable.reflectType(T) as ClassMirror;
-
-      this.data = classMirror.newInstance('fromJson', [
-        {...this.data!.toJson(), 'lastModifiedDate': DateHelper.nowUtc()}
-      ]);
+    if (this.data != null && this.data.lastModifiedDate == null) {
+      this.data.lastModifiedDate = DateHelper.nowUtc();
     }
 
-    return this.dataSource.saveOne(
+    return this.repository.saveOne(
         entity: this.data as T,
-        // database: this.database,
+        database: this.database,
         mergeMode: this._mergeMode,
         saveOptions: saveOptions);
   }
 
-  Future<int> delete() {
+  Future delete() {
     if (this.id != null) {
-      return this.dataSource.deleteById(
-            id: this.id as String,
-            // database: this.database,
-          );
+      return this
+          .repository
+          .deleteById(id: this.id as String, database: this.database);
     }
 
-    return this.dataSource.deleteAll();
+    return this.repository.deleteAll();
   }
 
   Future createTable() async {
-    return await this.dataSource.create(
-        // database: this.database,
-        );
+    return await this.repository.create(database: this.database);
   }
 
-  Future<int> count() {
-    return this.dataSource.count(
-        // database: this.database,
-        );
+  Future count() {
+    return this.repository.count(database: this.database);
   }
 
   Future create() {
-    return this.dataSource.create(
-        // database: database,
-        );
+    return this.repository.create(database: database);
   }
 
-  Future<List<T>> fetchOnline({Dio? dioTestClient}) async {
+  Future<List<T>> _fetchOnline({Dio? dioTestClient}) async {
     // final dhisUrl = await this.dhisUrl();
     final dataRunUrl = await this.dataRunUrl();
-    final response = await HttpClient.get(
-      dataRunUrl,
-      // database: this.database,
-      dioTestClient: dioTestClient,
-    );
+    final response = await HttpClient.get(dataRunUrl,
+        database: this.database, dioTestClient: dioTestClient);
 
     List data = response.body != null
         ? response.body[this.apiResourceName]?.toList() ?? []
@@ -345,7 +311,7 @@ class BaseQuery<T extends BaseEntity> implements BaseRepository<T> {
             percentage: 0),
         false);
 
-    this.data = await this.fetchOnline(dioTestClient: dioTestClient);
+    this.data = await this._fetchOnline(dioTestClient: dioTestClient);
 
     callback(
         RequestProgress(

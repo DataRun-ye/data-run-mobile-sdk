@@ -1,3 +1,4 @@
+import 'package:d2_remote/modules/datarun/form/shared/value_type.dart';
 import 'package:intl/intl.dart';
 
 extension UiDateString on String {}
@@ -14,6 +15,12 @@ class DateHelper {
 
   static const String TIME_FORMAT = 'HH:mm';
 
+  static String getEffectiveUiFormat(ValueType? valueType) => switch (valueType) {
+        ValueType.Date => DateHelper.UI_DATE_FORMAT,
+        ValueType.Time => DateHelper.TIME_FORMAT,
+        _ => DateHelper.DATE_TIME_FORMAT_EXPRESSION,
+      };
+
   static DateFormat databaseDateFormat() {
     return DateFormat(DATABASE_FORMAT_EXPRESSION, 'en_US');
   }
@@ -23,7 +30,7 @@ class DateHelper {
   }
 
   static DateFormat uiDateFormatNoSeconds() {
-    return DateFormat(DATABASE_FORMAT_EXPRESSION_NO_SECONDS, 'en_US');
+    return DateFormat(DATE_TIME_FORMAT_EXPRESSION, 'en_US');
   }
 
   static DateFormat timeFormat() {
@@ -39,19 +46,23 @@ class DateHelper {
 
   /// from DbUtc To Ui Local Format
   static String fromDbUtcToUiLocalFormat(String date,
-      {bool includeTime = false}) {
+      {bool includeTime = false, bool onlyTime = false}) {
     final DateTime? parsed =
         DateTime.tryParse(date.endsWith('Z') ? date : '${date}Z');
     return parsed != null
-        ? DateHelper.formatForUi(parsed, includeTime: includeTime)
+        ? DateHelper.formatForUi(parsed,
+            includeTime: includeTime, onlyTime: onlyTime)
         : date;
   }
 
   static String formatForUi(DateTime dateTime,
       {bool includeTime = false, bool onlyTime = false}) {
     final DateTime localDate = dateTime.toLocal();
-    final DateFormat formatter =
-        includeTime ? uiDateFormatNoSeconds() : uiDateFormat();
+    final DateFormat formatter = includeTime
+        ? onlyTime
+            ? timeFormat()
+            : uiDateFormatNoSeconds()
+        : uiDateFormat();
     return formatter.format(localDate);
   }
 

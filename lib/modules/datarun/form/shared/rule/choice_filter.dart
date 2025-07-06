@@ -1,10 +1,10 @@
-import 'package:d2_remote/modules/datarun/form/shared/form_option.entity.dart';
 import 'package:d2_remote/modules/datarun/form/shared/rule/expression_provider.dart';
+import 'package:d2_remote/modules/metadatarun/option_set/entities/option.entity.dart';
 import 'package:expressions/src/expressions.dart';
 
 class ChoiceFilter
-    implements ExpressionProvider, EvaluationEngine<List<FormOption>> {
-  final List<FormOption> options;
+    implements ExpressionProvider, EvaluationEngine<List<Option>> {
+  final List<Option> options;
   final String? expression;
 
   const ChoiceFilter({required this.expression, this.options = const []});
@@ -15,8 +15,8 @@ class ChoiceFilter
   }
 
   @override
-  List<FormOption> evaluate([Map<String, dynamic>? context]) {
-    List<FormOption> result = options;
+  List<Option> evaluate([Map<String, dynamic>? context]) {
+    List<Option> result = options;
     if (expression != null || options.any((o) => o.filterExpression != null)) {
       result = options
           .where((option) => evaluator.eval(
@@ -33,7 +33,7 @@ class ChoiceFilter
   }
 
   ChoiceFilter copyWith({
-    List<FormOption>? options,
+    List<Option>? options,
     String? expression,
   }) {
     return ChoiceFilter(

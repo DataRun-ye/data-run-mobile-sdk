@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:d2_remote/core/annotations/index.dart' as legacy;
 import 'package:d2_remote/shared/entities/identifiable.entity.dart';
 
@@ -14,6 +12,7 @@ class IdentifiableTreeNode extends IdentifiableEntity {
   @legacy.Column(name: 'parent', nullable: true)
   String? parent;
 
+  // NMC
   @legacy.Column(nullable: true, type: legacy.ColumnType.TEXT)
   List<IdentifiableTreeNode>? ancestors;
 
@@ -36,28 +35,4 @@ class IdentifiableTreeNode extends IdentifiableEntity {
             dirty: dirty,
             createdDate: createdDate,
             lastModifiedDate: lastModifiedDate);
-
-  Map<String, dynamic> toJson() {
-    final data = {
-      'id': id,
-      'code': code,
-      'name': name,
-      'path': path,
-      'parent': parent,
-      'createdDate': createdDate,
-      'lastModifiedDate': lastModifiedDate,
-      'displayName': displayName,
-      'label': jsonEncode(label),
-      'ancestors': ancestors != null
-          ? jsonEncode(ancestors!.map((ancestor) => ancestor.toJson()).toList())
-          : null,
-      'dirty': dirty,
-    };
-
-    if (this.parent != null) {
-      data['parent'] = this.parent;
-    }
-
-    return data;
-  }
 }

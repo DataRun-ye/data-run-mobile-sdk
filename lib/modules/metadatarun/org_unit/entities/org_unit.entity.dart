@@ -8,14 +8,39 @@ import 'package:d2_remote/shared/entities/identifiable_tree_node.entity.dart';
 @legacy.AnnotationReflectable
 @legacy.Entity(tableName: 'orgUnit', apiResourceName: 'orgUnits')
 class OrgUnit extends IdentifiableTreeNode {
+  // @legacy.Column(nullable: true)
+  // String? path;
+
+  // @legacy.Column(nullable: true)
+  // String? parentUid;
+
+  // @legacy.Column(nullable: true, type: legacy.ColumnType.INTEGER)
+  // int? level;
+
+  // @legacy.Column(nullable: false, type: legacy.ColumnType.TEXT)
+  // Map<String, String> label;
+
+  // @legacy.Column(nullable: true, type: legacy.ColumnType.TEXT)
+  // Geometry? geometry;
+
   @legacy.Column(nullable: true)
   Object? geometry;
+
+  // @legacy.Column(name: 'parent', nullable: true)
+  // String? parent;
+  //
+  // // NMC
+  // @legacy.Column(nullable: true, type: legacy.ColumnType.TEXT)
+  // List<OrgUnit>? ancestors;
+  // @legacy.OneToMany(table: OrgUnit)
+  // final List<OrgUnit>? ancestors;
 
   @legacy.Column(nullable: true, type: legacy.ColumnType.TEXT)
   EntityScope? scope;
 
   OrgUnit(
       {required String id,
+      // required String uid,
       required String name,
       String? displayName,
       String? code,
@@ -55,6 +80,7 @@ class OrgUnit extends IdentifiableTreeNode {
 
     return OrgUnit(
         id: json['uid'] ?? json['id'].toString(),
+        // uid: json['uid'],
         code: json['code'],
         name: json['name'],
         path: json['path'],
@@ -63,13 +89,13 @@ class OrgUnit extends IdentifiableTreeNode {
         parent: parent != null
             ? parent is String
                 ? parent
-                : (parent['uid'] ?? parent['id'])
+                : parent['uid']
             : null,
         label: json['label'] != null
             ? Map<String, String>.from(json['label'] is String
                 ? jsonDecode(json['label'])
                 : json['label'])
-            : {"en": json['name']},
+            : {"en": json['name'], "ar": json['name']},
         // geometry: geometry,
         geometry: json['geometry']?.toString() ?? null,
         createdDate: json['createdDate'],
@@ -90,6 +116,7 @@ class OrgUnit extends IdentifiableTreeNode {
       'lastModifiedDate': lastModifiedDate,
       'displayName': displayName,
       'label': jsonEncode(label),
+      // 'ancestors': this.ancestors,
       'ancestors': ancestors != null
           ? jsonEncode(ancestors!.map((ancestor) => ancestor.toJson()).toList())
           : null,
