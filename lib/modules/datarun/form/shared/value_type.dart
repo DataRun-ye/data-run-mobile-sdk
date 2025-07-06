@@ -67,9 +67,10 @@ enum ValueType {
   ];
 
   static const List<ValueType> DECIMAL_TYPES = <ValueType>[
-    ValueType.Number, ValueType.UnitInterval, ValueType.Percentage
+    ValueType.Number,
+    ValueType.UnitInterval,
+    ValueType.Percentage
   ];
-
 
   static const List<ValueType> BASIC_TYPES = <ValueType>[
     Text,
@@ -112,7 +113,7 @@ enum ValueType {
     Percentage
   ];
 
-  static const List<ValueType> DATE_TYPES = <ValueType>[Date, DateTime];
+  static const List<ValueType> DATE_TYPES = <ValueType>[Date, DateTime, Time];
 
   static const List<ValueType> FILE_TYPES = <ValueType>[Image, FileResource];
 

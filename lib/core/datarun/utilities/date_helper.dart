@@ -1,3 +1,4 @@
+import 'package:d2_remote/modules/datarun/form/shared/value_type.dart';
 import 'package:intl/intl.dart';
 
 extension UiDateString on String {}
@@ -14,6 +15,12 @@ class DateHelper {
 
   static const String TIME_FORMAT = 'HH:mm';
 
+  static String getEffectiveUiFormat(ValueType? valueType) => switch (valueType) {
+        ValueType.Date => DateHelper.UI_DATE_FORMAT,
+        ValueType.Time => DateHelper.TIME_FORMAT,
+        _ => DateHelper.DATE_TIME_FORMAT_EXPRESSION,
+      };
+
   static DateFormat databaseDateFormat() {
     return DateFormat(DATABASE_FORMAT_EXPRESSION, 'en_US');
   }
@@ -23,7 +30,7 @@ class DateHelper {
   }
 
   static DateFormat uiDateFormatNoSeconds() {
-    return DateFormat(DATABASE_FORMAT_EXPRESSION_NO_SECONDS, 'en_US');
+    return DateFormat(DATE_TIME_FORMAT_EXPRESSION, 'en_US');
   }
 
   static DateFormat timeFormat() {
